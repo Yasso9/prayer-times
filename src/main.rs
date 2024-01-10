@@ -1,3 +1,8 @@
+mod time;
+use crate::time::prayer_time::{EnumPrayer, Prayers};
+use chrono::{Local, NaiveDate};
+use clap::Parser;
+
 use std::path::PathBuf;
 
 use islam::salah::{Config, Location, Madhab, Method, PrayerSchedule};
@@ -23,8 +28,6 @@ fn send_notification(prayer_name: &str) {
         Err(_) => println!("Failed to send notification"),
     }
 }
-
-use clap::Parser;
 
 #[derive(Debug, Clone)]
 enum PrayerMethod {
@@ -164,19 +167,22 @@ fn main() {
     // Test notification
     // send_notification("Asr");
 
-    let mut prayer = prayer_times.current();
-    loop {
-        println!("Checking prayer time...");
+    let prayers = Prayers::new(Local::now().date_naive(), 49.049182, 2.035162);
+    println!("Dhuhr: {}", prayers.get(EnumPrayer::Dhuhr).date());
 
-        let new_prayer = prayer_times.current();
-        // Check if the prayer has changed
-        if new_prayer != prayer {
-            let prayer_name = new_prayer.name().unwrap_or_default();
-            send_notification(&prayer_name);
-            prayer = new_prayer;
-        }
+    // let mut prayer = prayer_times.current();
+    // loop {
+    //     println!("Checking prayer time...");
 
-        println!("Sleeping...");
-        std::thread::sleep(SLEEPING_TIME);
-    }
+    //     let new_prayer = prayer_times.current();
+    //     // Check if the prayer has changed
+    //     if new_prayer != prayer {
+    //         let prayer_name = new_prayer.name().unwrap_or_default();
+    //         send_notification(&prayer_name);
+    //         prayer = new_prayer;
+    //     }
+
+    //     println!("Sleeping...");
+    //     std::thread::sleep(SLEEPING_TIME);
+    // }
 }
