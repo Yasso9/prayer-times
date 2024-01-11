@@ -11,3 +11,5 @@ chrono = "0.4.31"
 clap = { version = "4.4.14", features = ["derive"] }
 islam = "3.2.0"
 notify-rust = "4.10.0"
+strum = "0.25.0"
+strum_macros = "0.25.3"
