@@ -10,22 +10,25 @@ fn fix(a: f64, b: f64) -> f64 {
 }
 
 mod math {
+    pub(crate) fn dcos(degrees: f64) -> f64 {
+        degrees.to_radians().cos()
+    }
     pub(crate) fn dsin(degrees: f64) -> f64 {
         degrees.to_radians().sin()
     }
-
-    pub(crate) fn dcos(degrees: f64) -> f64 {
-        degrees.to_radians().cos()
+    pub(crate) fn dtan(degrees: f64) -> f64 {
+        degrees.to_radians().tan()
     }
 
     pub(crate) fn darcsin(x: f64) -> f64 {
         x.asin().to_degrees()
     }
-
     pub(crate) fn darccos(x: f64) -> f64 {
         x.acos().to_degrees()
     }
-
+    pub(crate) fn darccot(x: f64) -> f64 {
+        (1. / x).atan().to_degrees()
+    }
     pub(crate) fn darctan2(y: f64, x: f64) -> f64 {
         y.atan2(x).to_degrees()
     }
@@ -67,8 +70,21 @@ impl DayValues {
     }
 }
 
-pub fn solar_time_adjustment(date: NaiveDate, angle: f64, latitude: f64) -> f64 {
+pub fn asr(date: NaiveDate, latitude: f64, object_shadow_multiplier: u32) -> f64 {
     let dos = DayValues::new(date).dos;
+
+    let t = object_shadow_multiplier as f64;
+    let i = math::darccot(t + math::dtan(latitude - dos));
+    let a = math::dsin(i) - math::dsin(latitude) * math::dsin(dos);
+    let b = math::dcos(latitude) * math::dcos(dos);
+
+    let sta = 1. / 15. * math::darccos(a / b);
+    sta
+}
+
+pub fn solar_time_adjustment(date: NaiveDate, latitude: f64, angle: f64) -> f64 {
+    let dos = DayValues::new(date).dos;
+
     let a = -math::dsin(angle) - math::dsin(latitude) * math::dsin(dos);
     let b = math::dcos(latitude) * math::dcos(dos);
 
