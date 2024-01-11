@@ -1,6 +1,6 @@
 mod calculations;
 
-use self::calculations::{equation_of_time as eot, solar_time_adjustment as sta};
+use self::calculations::{asr, equation_of_time as eot, solar_time_adjustment as sta};
 use chrono::{Local, NaiveDate, NaiveDateTime, NaiveTime};
 use strum_macros::EnumString;
 
@@ -67,20 +67,28 @@ impl PrayersSchedule {
     pub fn get(&self, enum_prayer: EnumPrayer) -> Prayer {
         let time;
 
-        let fajr_angle = 18;
-        let ishaa_angle = 17;
+        let fajr_angle = 18.;
+        let ishaa_angle = 17.;
+
+        let object_shadow = 1;
 
         match enum_prayer {
             EnumPrayer::Fajr => {
-                time = self.dhuhr() - sta(self.date, fajr_angle as f64, self.latitude);
+                time = self.dhuhr() - sta(self.date, self.latitude, fajr_angle);
             }
             EnumPrayer::Dhuhr => {
                 time = self.dhuhr();
             }
-            EnumPrayer::Isha => {
-                time = self.dhuhr() + sta(self.date, ishaa_angle as f64, self.latitude);
+            EnumPrayer::Asr => {
+                time = self.dhuhr() + asr(self.date, self.latitude, object_shadow);
             }
-            _ => panic!("Prayer not handled"),
+            EnumPrayer::Maghrib => {
+                let sunset = self.dhuhr() + sta(self.date, self.latitude, 0.833);
+                time = sunset;
+            }
+            EnumPrayer::Isha => {
+                time = self.dhuhr() + sta(self.date, self.latitude, ishaa_angle);
+            }
         }
 
         Prayer {

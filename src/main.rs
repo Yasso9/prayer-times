@@ -39,12 +39,12 @@ fn main() {
     let prayers = PrayersSchedule::new(Local::now().date_naive(), 49.049182, 2.035162);
     println!("Fajr: {}", prayers.get(EnumPrayer::Fajr).date());
     println!("Dhuhr: {}", prayers.get(EnumPrayer::Dhuhr).date());
-    // println!("Asr: {}", prayers.get(EnumPrayer::Asr).date());
-    // println!("Maghrib: {}", prayers.get(EnumPrayer::Maghrib).date());
+    println!("Asr: {}", prayers.get(EnumPrayer::Asr).date());
+    println!("Maghrib: {}", prayers.get(EnumPrayer::Maghrib).date());
     println!("Isha: {}", prayers.get(EnumPrayer::Isha).date());
 
     // Test notification
-    // send_notification("Asr");
+    send_notification("Asr");
 
     loop {
         println!("Sleeping...");
