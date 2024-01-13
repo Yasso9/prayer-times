@@ -5,7 +5,7 @@ use self::{
     arguments::Config,
     calculations::{asr, equation_of_time as eot, solar_time_adjustment as sta},
 };
-use chrono::{Days, Local, NaiveDate, NaiveDateTime, NaiveTime};
+use chrono::{Days, Duration, Local, NaiveDate, NaiveDateTime, NaiveTime};
 use strum_macros::Display;
 
 #[derive(Clone, Copy, Display, PartialEq)]
@@ -73,7 +73,12 @@ impl Prayer {
 
     pub fn next(&self) -> Prayer {
         let next_prayer = get_prayer(self.enum_prayer.next(), self.date.date());
-        if next_prayer.date_time().date() == self.date_time().date() {
+        // println!(
+        //     "Next 1st: {} {}",
+        //     next_prayer.enum_prayer(),
+        //     next_prayer.date_time()
+        // );
+        if next_prayer.date_time().time() >= self.date_time().time() {
             return next_prayer;
         }
 
@@ -83,6 +88,23 @@ impl Prayer {
             .checked_add_days(Days::new(1))
             .unwrap();
         return get_prayer(self.enum_prayer.next(), next_date);
+    }
+
+    // Returns the time remaining for the next prayer to happen
+    pub fn time_remaining(&self) -> Duration {
+        let duration = self
+            .date_time()
+            .signed_duration_since(Local::now().naive_local());
+
+        // println!("Next prayer : {} {}", self.enum_prayer(), self.date_time());
+        // println!("Current time: {}", Local::now().naive_local());
+        // println!("Duration: {:?}", duration);
+        // println!("Duration Hour: {}", duration.num_hours());
+
+        if duration < Duration::zero() {
+            return Duration::zero();
+        }
+        duration
     }
 }
 
