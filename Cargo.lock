@@ -738,16 +738,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "islam"
-version = "3.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ea397def01a3ef4965521f76e6a8ce8e84e8f6b027da0aa7662ebfdd6913bb9f"
-dependencies = [
- "chrono",
- "thiserror",
-]
-
-[[package]]
 name = "js-sys"
 version = "0.3.66"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -989,11 +979,10 @@ checksum = "5b40af805b3121feab8a3c29f04d8ad262fa8e0561883e7653e024ae4479e6de"
 
 [[package]]
 name = "prayer-time"
-version = "0.0.1"
+version = "0.1.0"
 dependencies = [
  "chrono",
  "clap",
- "islam",
  "notify-rust",
  "strum",
  "strum_macros",

@@ -70,7 +70,7 @@ impl DayValues {
     }
 }
 
-pub fn asr(date: NaiveDate, latitude: f64, object_shadow_multiplier: u32) -> f64 {
+pub fn asr(date: NaiveDate, latitude: f64, object_shadow_multiplier: u8) -> f64 {
     let dos = DayValues::new(date).dos;
 
     let t = object_shadow_multiplier as f64;
