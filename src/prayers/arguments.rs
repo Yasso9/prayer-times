@@ -36,6 +36,10 @@ struct Arguments {
     /// Minutes to add or remove to the Isha time
     #[arg(long, default_value_t = 0)]
     isha_mod: i8,
+
+    /// Show notification 10 minutes before prayer time
+    #[arg(long, default_value_t = true)]
+    notify_before: bool,
 }
 
 struct Location {
@@ -129,7 +133,7 @@ pub struct Config {
 impl Config {
     pub fn new() -> Self {
         let args = Arguments::parse();
-        println!("{:?}", args);
+        // println!("{:?}", args);
         Self {
             location: Location {
                 lat: args.latitude,
