@@ -48,7 +48,7 @@ struct Location {
 }
 
 #[derive(Debug, Clone, EnumString)]
-pub enum Method {
+enum Method {
     MuslimWorldLeague,
     NorthAmerica,
     Egyptian,
@@ -72,7 +72,7 @@ pub enum Method {
     // Lisboa,
 }
 impl Method {
-    pub fn fajr_angle(&self) -> f64 {
+    fn fajr_angle(&self) -> f64 {
         match self {
             Method::MuslimWorldLeague => 18.,
             Method::NorthAmerica => 15.,
@@ -85,7 +85,7 @@ impl Method {
             Method::FranceGMP => 18.,
         }
     }
-    pub fn isha_angle(&self) -> f64 {
+    fn isha_angle(&self) -> f64 {
         match self {
             Method::MuslimWorldLeague => 17.,
             Method::NorthAmerica => 15.,
@@ -107,12 +107,12 @@ impl Default for Method {
 }
 
 #[derive(Debug, Clone, EnumString)]
-pub enum Madhab {
+enum Madhab {
     Shafi,
     Hanafi,
 }
 impl Madhab {
-    pub fn shadow_multiplier(&self) -> u8 {
+    fn shadow_multiplier(&self) -> u8 {
         match self {
             Madhab::Shafi => 1,
             Madhab::Hanafi => 2,
@@ -129,6 +129,7 @@ pub struct Config {
     method: Method,
     madhab: Madhab,
     time_mod: [i8; 5],
+    notify_before: bool,
 }
 impl Config {
     pub fn new() -> Self {
@@ -148,6 +149,7 @@ impl Config {
                 args.maghrib_mod,
                 args.isha_mod,
             ],
+            notify_before: args.notify_before,
         }
     }
 
@@ -182,5 +184,9 @@ impl Config {
     }
     pub fn isha_offset(&self) -> f64 {
         self.time_mod[4] as f64 / 60.
+    }
+
+    pub fn notify_before(&self) -> bool {
+        self.notify_before
     }
 }

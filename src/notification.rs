@@ -10,11 +10,24 @@ fn get_icon() -> Result<PathBuf, std::io::Error> {
 }
 
 // Send notification to the screen
-pub fn notify(prayer: &Prayer) {
+pub fn notify_prayer(prayer: &Prayer) {
+    let notification = Notification::new()
+        .summary(&format!("Adhan {}", prayer.event().to_string().as_str()))
+        .icon(get_icon().unwrap_or_default().to_str().unwrap_or_default())
+        .urgency(Urgency::Critical)
+        .show();
+    match notification {
+        Ok(_) => println!("Notification sent"),
+        Err(_) => println!("Failed to send notification"),
+    }
+}
+
+pub fn notify_before_prayer(prayer: &Prayer, duration: chrono::Duration) {
     let notification = Notification::new()
         .summary(&format!(
-            "Adhan {}",
-            prayer.enum_prayer().to_string().as_str()
+            "Adhan {} in {} minutes",
+            prayer.event().to_string().as_str(),
+            duration.num_minutes()
         ))
         .icon(get_icon().unwrap_or_default().to_str().unwrap_or_default())
         .urgency(Urgency::Critical)

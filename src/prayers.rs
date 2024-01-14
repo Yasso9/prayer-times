@@ -1,4 +1,4 @@
-mod arguments;
+pub mod arguments;
 mod calculations;
 
 use self::{
@@ -9,57 +9,57 @@ use chrono::{Days, Duration, Local, NaiveDate, NaiveDateTime, NaiveTime};
 use strum_macros::Display;
 
 #[derive(Clone, Copy, Display, PartialEq)]
-pub enum EnumPrayer {
+pub enum Event {
     Fajr,
     Dhuhr,
     Asr,
     Maghrib,
     Isha,
 }
-impl EnumPrayer {
-    fn list() -> [EnumPrayer; 5] {
+impl Event {
+    fn list() -> [Event; 5] {
         [
-            EnumPrayer::Fajr,
-            EnumPrayer::Dhuhr,
-            EnumPrayer::Asr,
-            EnumPrayer::Maghrib,
-            EnumPrayer::Isha,
+            Event::Fajr,
+            Event::Dhuhr,
+            Event::Asr,
+            Event::Maghrib,
+            Event::Isha,
         ]
     }
-    pub fn previous(&self) -> EnumPrayer {
+    pub fn previous(&self) -> Event {
         match self {
-            EnumPrayer::Fajr => EnumPrayer::Isha,
-            EnumPrayer::Dhuhr => EnumPrayer::Fajr,
-            EnumPrayer::Asr => EnumPrayer::Dhuhr,
-            EnumPrayer::Maghrib => EnumPrayer::Asr,
-            EnumPrayer::Isha => EnumPrayer::Maghrib,
+            Event::Fajr => Event::Isha,
+            Event::Dhuhr => Event::Fajr,
+            Event::Asr => Event::Dhuhr,
+            Event::Maghrib => Event::Asr,
+            Event::Isha => Event::Maghrib,
         }
     }
-    pub fn next(&self) -> EnumPrayer {
+    pub fn next(&self) -> Event {
         match self {
-            EnumPrayer::Fajr => EnumPrayer::Dhuhr,
-            EnumPrayer::Dhuhr => EnumPrayer::Asr,
-            EnumPrayer::Asr => EnumPrayer::Maghrib,
-            EnumPrayer::Maghrib => EnumPrayer::Isha,
-            EnumPrayer::Isha => EnumPrayer::Fajr,
+            Event::Fajr => Event::Dhuhr,
+            Event::Dhuhr => Event::Asr,
+            Event::Asr => Event::Maghrib,
+            Event::Maghrib => Event::Isha,
+            Event::Isha => Event::Fajr,
         }
     }
 }
 pub struct Prayer {
-    enum_prayer: EnumPrayer,
+    event: Event,
     date: NaiveDateTime,
 }
 impl Prayer {
     pub fn date_time(&self) -> NaiveDateTime {
         self.date
     }
-    pub fn enum_prayer(&self) -> EnumPrayer {
-        self.enum_prayer
+    pub fn event(&self) -> Event {
+        self.event
     }
 
     pub fn previous(&self) -> Prayer {
-        let previous_prayer = get_prayer(self.enum_prayer.previous(), self.date.date());
-        if previous_prayer.date_time().date() == self.date_time().date() {
+        let previous_prayer = get_prayer(self.event.previous(), self.date.date());
+        if previous_prayer.date_time().time() <= self.date_time().time() {
             return previous_prayer;
         }
 
@@ -68,11 +68,11 @@ impl Prayer {
             .date()
             .checked_sub_days(Days::new(1))
             .unwrap();
-        return get_prayer(self.enum_prayer.previous(), previous_date);
+        return get_prayer(self.event.previous(), previous_date);
     }
 
     pub fn next(&self) -> Prayer {
-        let next_prayer = get_prayer(self.enum_prayer.next(), self.date.date());
+        let next_prayer = get_prayer(self.event.next(), self.date.date());
         // println!(
         //     "Next 1st: {} {}",
         //     next_prayer.enum_prayer(),
@@ -87,7 +87,7 @@ impl Prayer {
             .date()
             .checked_add_days(Days::new(1))
             .unwrap();
-        return get_prayer(self.enum_prayer.next(), next_date);
+        return get_prayer(self.event.next(), next_date);
     }
 
     // Returns the time remaining for the next prayer to happen
@@ -96,11 +96,6 @@ impl Prayer {
             .date_time()
             .signed_duration_since(Local::now().naive_local());
 
-        // println!("Next prayer : {} {}", self.enum_prayer(), self.date_time());
-        // println!("Current time: {}", Local::now().naive_local());
-        // println!("Duration: {:?}", duration);
-        // println!("Duration Hour: {}", duration.num_hours());
-
         if duration < Duration::zero() {
             return Duration::zero();
         }
@@ -108,7 +103,7 @@ impl Prayer {
     }
 }
 
-pub fn get_prayer(enum_prayer: EnumPrayer, date: NaiveDate) -> Prayer {
+pub fn get_prayer(enum_prayer: Event, date: NaiveDate) -> Prayer {
     fn dhuhr(date: NaiveDate, config: &Config) -> f64 {
         let timezone = Local::now().offset().local_minus_utc() / 3600;
 
@@ -130,27 +125,27 @@ pub fn get_prayer(enum_prayer: EnumPrayer, date: NaiveDate) -> Prayer {
     let time;
 
     match enum_prayer {
-        EnumPrayer::Fajr => {
+        Event::Fajr => {
             time = dhuhr - sta(date, config.lat(), config.fajr()) + config.fajr_offset();
         }
-        EnumPrayer::Dhuhr => {
+        Event::Dhuhr => {
             time = dhuhr + config.dhuhr_offset();
         }
-        EnumPrayer::Asr => {
+        Event::Asr => {
             time =
                 dhuhr + asr(date, config.lat(), config.shadow_multiplier()) + config.asr_offset();
         }
-        EnumPrayer::Maghrib => {
+        Event::Maghrib => {
             let sunset = dhuhr + sta(date, config.lat(), 0.833);
             time = sunset + config.maghrib_offset();
         }
-        EnumPrayer::Isha => {
+        Event::Isha => {
             time = dhuhr + sta(date, config.lat(), config.isha()) + config.isha_offset();
         }
     }
 
     Prayer {
-        enum_prayer,
+        event: enum_prayer,
         date: to_naive_date_time(date, time),
     }
 }
@@ -162,23 +157,24 @@ pub fn next() -> Prayer {
     let current_date = Local::now().date_naive();
     let current_time = Local::now().time();
 
-    for enum_prayer in EnumPrayer::list() {
+    for enum_prayer in Event::list() {
         let prayer = get_prayer(enum_prayer, current_date);
         if current_time <= prayer.date_time().time() {
             return prayer;
         }
     }
 
-    get_prayer(EnumPrayer::Isha, current_date).next()
+    // Time of fajr of tomorrow
+    get_prayer(Event::Isha, current_date).next()
 }
 pub fn list_prayers() -> [Prayer; 5] {
     let date = Local::now().date_naive();
 
     [
-        get_prayer(EnumPrayer::Fajr, date),
-        get_prayer(EnumPrayer::Dhuhr, date),
-        get_prayer(EnumPrayer::Asr, date),
-        get_prayer(EnumPrayer::Maghrib, date),
-        get_prayer(EnumPrayer::Isha, date),
+        get_prayer(Event::Fajr, date),
+        get_prayer(Event::Dhuhr, date),
+        get_prayer(Event::Asr, date),
+        get_prayer(Event::Maghrib, date),
+        get_prayer(Event::Isha, date),
     ]
 }
