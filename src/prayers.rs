@@ -73,11 +73,6 @@ impl Prayer {
 
     pub fn next(&self) -> Prayer {
         let next_prayer = get_prayer(self.event.next(), self.date.date());
-        // println!(
-        //     "Next 1st: {} {}",
-        //     next_prayer.enum_prayer(),
-        //     next_prayer.date_time()
-        // );
         if next_prayer.date_time().time() >= self.date_time().time() {
             return next_prayer;
         }

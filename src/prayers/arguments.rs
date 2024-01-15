@@ -3,7 +3,7 @@ use strum_macros::EnumString;
 
 /// Program to notify prayer times
 #[derive(Parser, Debug)]
-#[command(name = "prayer-time")]
+#[command(name = "prayer-times")]
 // Read from `Cargo.toml`
 #[command(author, version, about, long_about = None)]
 struct Arguments {
@@ -31,7 +31,7 @@ struct Arguments {
     #[arg(long, default_value_t = 0)]
     asr_mod: i8,
     /// Minutes to add or remove to the Maghrib time
-    #[arg(long, default_value_t = 0)]
+    #[arg(long, default_value_t = 3)]
     maghrib_mod: i8,
     /// Minutes to add or remove to the Isha time
     #[arg(long, default_value_t = 0)]

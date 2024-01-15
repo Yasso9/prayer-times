@@ -31,6 +31,8 @@ fn main() {
 
     let config = Config::new();
 
+    let mut is_notified_before = false;
+
     loop {
         let time_remaining = next_prayer.time_remaining();
         println!(
@@ -40,14 +42,16 @@ fn main() {
             time_remaining.num_minutes() % 60
         );
 
-        if config.notify_before() && time_remaining < Duration::minutes(10) {
+        if config.notify_before() && !is_notified_before && time_remaining < Duration::minutes(10) {
             notify_before_prayer(&next_prayer, time_remaining);
+            is_notified_before = true;
         }
 
-        if time_remaining < Duration::zero() {
+        if time_remaining <= Duration::zero() {
             notify_prayer(&next_prayer);
             // Update next prayer
             next_prayer = prayers::next();
+            is_notified_before = false;
         }
 
         println!("Sleeping...");
