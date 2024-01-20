@@ -31,7 +31,7 @@ Options:
 Clone the repository and build the executable. You should have `cargo` installed:
 
 ```sh
-git clone https://github.com/your/repository.git
+git clone https://github.com/Yasso9/prayer-times
 cd prayer-times
 cargo build --release
 ```

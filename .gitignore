@@ -1,1 +1,4 @@
-/target
+/target/
+/pkg/
+/prayer-time*.tar.gz
+/prayer-time*.zst
