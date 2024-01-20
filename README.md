@@ -8,7 +8,7 @@ It uses accurate calculation of prayer times based on geographical coordinates b
 
 ## Usage
 
-```sh
+```man
 Usage: prayer-time [OPTIONS] --latitude <LATITUDE> --longitude <LONGITUDE>
 
 Options:
