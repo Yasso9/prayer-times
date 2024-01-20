@@ -11,7 +11,7 @@ use crate::{
 fn main() {
     println!("Starting Prayer Time Daemon");
 
-    // Informations
+    // Print Prayer Informations
     for prayer in prayers::list_prayers() {
         println!("Adhan {} at {}", prayer.event(), prayer.date_time().time());
     }

@@ -1,9 +1,13 @@
 [package]
 name = "prayer-times"
-description = "Islamic Prayer Times Notification"
 version = "0.1.0"
-authors = ["Ilyas Turki"]
+authors = ["Ilyas Turki <turki.ilyass@gmail.com>"]
 edition = "2021"
+description = "Islamic Prayer Times Notification"
+readme = "README.md"
+homepage = "https://github.com/Yasso9/prayer-times"
+repository = "https://github.com/Yasso9/prayer-times"
+license = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
