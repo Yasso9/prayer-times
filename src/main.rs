@@ -25,7 +25,7 @@ fn main() {
 
     // For test purpose
     if cfg!(debug_assertions) {
-        notify_prayer(&next_prayer);
+        notify_prayer(&next_prayer, &config);
     }
 
     let mut is_notified_before = false;
@@ -39,7 +39,7 @@ fn main() {
             // If it's not the current prayer, it means that the system have been suspended
             // so we Are currently in an other prayer
             if next_prayer == prayers::current(&config) {
-                notify_prayer(&next_prayer);
+                notify_prayer(&next_prayer, &config);
             }
 
             // Update next prayer
