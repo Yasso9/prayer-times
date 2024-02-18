@@ -1,7 +1,7 @@
 use notify_rust::{Notification, Urgency};
 use std::path::PathBuf;
 
-use crate::prayers::Prayer;
+use crate::prayer::Prayer;
 
 // Get the icon of the notification that should be sent
 fn get_icon() -> Result<PathBuf, std::io::Error> {
@@ -26,7 +26,7 @@ pub fn notify_before_prayer(prayer: &Prayer, duration: chrono::Duration) {
     let notification = Notification::new()
         .summary(&format!(
             "Adhan {} in {} minutes",
-            prayer.event().to_string().as_str(),
+            prayer.event().to_string(),
             duration.num_minutes()
         ))
         .icon(get_icon().unwrap_or_default().to_str().unwrap_or_default())

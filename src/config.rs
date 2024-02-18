@@ -132,6 +132,7 @@ pub struct Config {
     notify_before: bool,
 }
 impl Config {
+    // Generate a new Config from command line arguments
     pub fn new() -> Self {
         let args = Arguments::parse();
         // println!("{:?}", args);
