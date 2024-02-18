@@ -1,39 +1,51 @@
+use crate::config::Config;
+use crate::prayer::Prayer;
 use notify_rust::{Notification, Urgency};
 use std::path::PathBuf;
 
-use crate::prayer::Prayer;
-
 // Get the icon of the notification that should be sent
 fn get_icon() -> Result<PathBuf, std::io::Error> {
-    let current_dir = std::env::current_dir()?;
-    Ok(current_dir.join("assets").join("mosque-svgrepo-com.png"))
+    let asset_path;
+
+    if cfg!(debug_assertions) {
+        let current_dir = std::env::current_dir()?;
+        asset_path = current_dir.join("assets");
+    } else {
+        asset_path = PathBuf::from("/usr/share/icons");
+    }
+    Ok(asset_path.join("mosque-svgrepo-com.png"))
 }
 
-// Send notification to the screen
-pub fn notify_prayer(prayer: &Prayer) {
-    let notification = Notification::new()
-        .summary(&format!("Adhan {}", prayer.event().to_string().as_str()))
-        .icon(get_icon().unwrap_or_default().to_str().unwrap_or_default())
-        .urgency(Urgency::Critical)
-        .show();
-    match notification {
+fn send_notification(summary: String, urgency: Urgency) {
+    let mut notification = Notification::new(); // so the notification will live
+    let notification = notification.summary(&summary).urgency(urgency);
+
+    match get_icon() {
+        Ok(icon_path) => match icon_path.to_str() {
+            Some(icon_path) => {
+                notification.icon(icon_path);
+            }
+            None => println!("Failed to get icon path"),
+        },
+        Err(_) => println!("Failed to get icon path"),
+    }
+
+    match notification.show() {
         Ok(_) => println!("Notification sent"),
         Err(_) => println!("Failed to send notification"),
     }
+}
+
+pub fn notify_prayer(prayer: &Prayer, config: &Config) {
+    let summary = format!("Adhan {}", prayer.event().to_string());
+    send_notification(summary, config.urgency());
 }
 
 pub fn notify_before_prayer(prayer: &Prayer, duration: chrono::Duration) {
-    let notification = Notification::new()
-        .summary(&format!(
-            "Adhan {} in {} minutes",
-            prayer.event().to_string(),
-            duration.num_minutes()
-        ))
-        .icon(get_icon().unwrap_or_default().to_str().unwrap_or_default())
-        .urgency(Urgency::Critical)
-        .show();
-    match notification {
-        Ok(_) => println!("Notification sent"),
-        Err(_) => println!("Failed to send notification"),
-    }
+    let summary = format!(
+        "Adhan {} in {} minutes",
+        prayer.event().to_string(),
+        duration.num_minutes()
+    );
+    send_notification(summary, Urgency::Low);
 }

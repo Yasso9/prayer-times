@@ -1,4 +1,5 @@
 use clap::Parser;
+use notify_rust::Urgency;
 use strum_macros::EnumString;
 
 /// Program to notify prayer times
@@ -40,6 +41,31 @@ struct Arguments {
     /// Show notification 10 minutes before prayer time
     #[arg(long, default_value_t = true)]
     notify_before: bool,
+
+    /// Notification urgency
+    #[arg(long, default_value = "Critical")]
+    urgency: NotifUrgency,
+}
+
+#[derive(Debug, Clone, EnumString)]
+enum NotifUrgency {
+    Low,
+    Normal,
+    Critical,
+}
+impl Default for NotifUrgency {
+    fn default() -> Self {
+        NotifUrgency::Critical
+    }
+}
+impl From<NotifUrgency> for Urgency {
+    fn from(urgency: NotifUrgency) -> Self {
+        match urgency {
+            NotifUrgency::Low => Urgency::Low,
+            NotifUrgency::Normal => Urgency::Normal,
+            NotifUrgency::Critical => Urgency::Critical,
+        }
+    }
 }
 
 struct Location {
@@ -130,6 +156,7 @@ pub struct Config {
     madhab: Madhab,
     time_mod: [i8; 5],
     notify_before: bool,
+    urgency: Urgency,
 }
 impl Config {
     // Generate a new Config from command line arguments
@@ -151,6 +178,7 @@ impl Config {
                 args.isha_mod,
             ],
             notify_before: args.notify_before,
+            urgency: args.urgency.into(),
         }
     }
 
@@ -189,5 +217,8 @@ impl Config {
 
     pub fn notify_before(&self) -> bool {
         self.notify_before
+    }
+    pub fn urgency(&self) -> Urgency {
+        self.urgency
     }
 }
