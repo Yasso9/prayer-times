@@ -71,12 +71,10 @@ impl Config {
 
         let mut is_deamon = false;
         let mut interval = config.notification.interval;
-        if let Some(command) = &args.command {
-            if let Commands::Deamon(deamon) = command {
-                is_deamon = true;
-                if deamon.interval.is_some() {
-                    interval = deamon.interval.unwrap();
-                }
+        if let Some(Commands::Deamon(deamon)) = &args.command {
+            is_deamon = true;
+            if deamon.interval.is_some() {
+                interval = deamon.interval.unwrap();
             }
         }
         if interval == 0 {

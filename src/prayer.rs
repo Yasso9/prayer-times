@@ -17,7 +17,7 @@ pub fn get_prayer(enum_prayer: Event, date: NaiveDate, config: &Config) -> Praye
         NaiveDateTime::new(date, naive_time.expect("Error in prayer calculation"))
     }
 
-    let dhuhr = dhuhr(date, &config);
+    let dhuhr = dhuhr(date, config);
 
     let time = match enum_prayer {
         Event::Fajr => {

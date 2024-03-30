@@ -22,7 +22,7 @@ use self::{
 use clap::Parser;
 
 fn background_process(config: &Config) {
-    let mut next_prayer = prayers::next(&config);
+    let mut next_prayer = prayers::next(config);
     let mut is_notified_before = false;
 
     println!("Starting Prayer Time Daemon");
@@ -36,12 +36,12 @@ fn background_process(config: &Config) {
             // Notification only if it's the current prayer.
             // If it's not the current prayer, it means that the system have been suspended
             // so we are currently in an other prayer
-            if next_prayer == prayers::current(&config) {
-                notify_prayer(&next_prayer, &config);
+            if next_prayer == prayers::current(config) {
+                notify_prayer(&next_prayer, config);
             }
 
             // Update next prayer
-            next_prayer = prayers::next(&config);
+            next_prayer = prayers::next(config);
             is_notified_before = false;
         } else if config.notify_before()
             && !is_notified_before

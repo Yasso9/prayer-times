@@ -5,8 +5,9 @@ use strum_macros::Display;
 use strum_macros::EnumIter;
 use strum_macros::EnumString;
 
-#[derive(Debug, Clone, EnumString, Serialize, Deserialize, EnumIter, Display)]
+#[derive(Default, Debug, Clone, EnumString, Serialize, Deserialize, EnumIter, Display)]
 pub enum Madhab {
+    #[default]
     Shafi,
     Hanafi,
 }
@@ -22,10 +23,5 @@ impl Madhab {
         for variant in Self::iter() {
             println!("{}", variant);
         }
-    }
-}
-impl Default for Madhab {
-    fn default() -> Self {
-        Madhab::Shafi
     }
 }

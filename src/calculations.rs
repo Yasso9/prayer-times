@@ -78,8 +78,7 @@ pub fn asr(date: NaiveDate, latitude: f64, object_shadow_multiplier: u8) -> f64 
     let a = math::dsin(i) - math::dsin(latitude) * math::dsin(dos);
     let b = math::dcos(latitude) * math::dcos(dos);
 
-    let sta = 1. / 15. * math::darccos(a / b);
-    sta
+    1. / 15. * math::darccos(a / b)
 }
 
 pub fn solar_time_adjustment(date: NaiveDate, latitude: f64, angle: f64) -> f64 {
@@ -88,8 +87,7 @@ pub fn solar_time_adjustment(date: NaiveDate, latitude: f64, angle: f64) -> f64 
     let a = -math::dsin(angle) - math::dsin(latitude) * math::dsin(dos);
     let b = math::dcos(latitude) * math::dcos(dos);
 
-    let sta = 1. / 15. * math::darccos(a / b);
-    sta
+    1. / 15. * math::darccos(a / b)
 }
 
 pub fn equation_of_time(date: NaiveDate) -> f64 {

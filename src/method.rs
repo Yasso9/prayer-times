@@ -5,8 +5,9 @@ use strum_macros::Display;
 use strum_macros::EnumIter;
 use strum_macros::EnumString;
 
-#[derive(Debug, Clone, EnumString, Serialize, Deserialize, EnumIter, Display)]
+#[derive(Default, Debug, Clone, EnumString, Serialize, Deserialize, EnumIter, Display)]
 pub enum Method {
+    #[default]
     MuslimWorldLeague,
     NorthAmerica,
     Egyptian,
@@ -66,10 +67,5 @@ impl Method {
                 variant.isha_angle()
             );
         }
-    }
-}
-impl Default for Method {
-    fn default() -> Self {
-        Method::MuslimWorldLeague
     }
 }

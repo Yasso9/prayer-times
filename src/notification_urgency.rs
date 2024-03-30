@@ -3,16 +3,12 @@ use serde::Deserialize;
 use serde::Serialize;
 use strum_macros::EnumString;
 
-#[derive(Debug, Clone, EnumString, Serialize, Deserialize)]
+#[derive(Default, Debug, Clone, EnumString, Serialize, Deserialize)]
 pub enum NotifUrgency {
     Low,
     Normal,
+    #[default]
     Critical,
-}
-impl Default for NotifUrgency {
-    fn default() -> Self {
-        NotifUrgency::Critical
-    }
 }
 impl From<NotifUrgency> for Urgency {
     fn from(urgency: NotifUrgency) -> Self {
