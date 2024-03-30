@@ -20,50 +20,10 @@ use self::{
 
 use clap::Parser;
 
-fn main() {
-    let args = Arguments::parse();
-    let config = Config::new(&args);
-
-    match args.command.unwrap_or_default() {
-        Commands::Deamon => {}
-        Commands::Current => {
-            let prayer = prayers::current(&config);
-            println!("{}", prayer.text_time());
-            return;
-        }
-        Commands::Next => {
-            let prayer = prayers::next(&config);
-            println!("{}", prayer.text_time());
-            return;
-        }
-        Commands::ListPrayers => {
-            println!("\nPrayer times:");
-            for prayer in prayers::list_prayers(&config) {
-                println!("{}", prayer.text_time());
-            }
-            return;
-        }
-        Commands::ListMethods => {
-            println!("\nMethods:");
-            Method::list_all();
-            return;
-        }
-        Commands::ListMadhab => {
-            println!("\nMadhab:");
-            Madhab::list_all();
-            return;
-        }
-        Commands::DryRunNotification => {
-            let next_prayer = prayers::next(&config);
-            notify_prayer(&next_prayer, &config);
-            return;
-        }
-    }
-
+fn background_process(config: &Config) {
     let mut next_prayer = prayers::next(&config);
     let mut is_notified_before = false;
 
-    // TODO: put the for loop inside the Deamon match enum
     println!("Starting Prayer Time Daemon");
     println!("Waiting for next prayer...");
     loop {
@@ -90,6 +50,43 @@ fn main() {
             is_notified_before = true;
         }
 
-        std::thread::sleep(std::time::Duration::from_secs(20));
+        std::thread::sleep(std::time::Duration::from_secs(config.interval()));
+    }
+}
+
+fn main() {
+    let args = Arguments::parse();
+    let config = Config::new(&args);
+
+    match args.command.unwrap_or_default() {
+        Commands::Deamon(_deamon) => {
+            background_process(&config);
+        }
+        Commands::Current => {
+            let prayer = prayers::current(&config);
+            println!("{}", prayer.text_time());
+        }
+        Commands::Next => {
+            let prayer = prayers::next(&config);
+            println!("{}", prayer.text_time());
+        }
+        Commands::ListPrayers => {
+            println!("\nPrayer times:");
+            for prayer in prayers::list_prayers(&config) {
+                println!("{}", prayer.text_time());
+            }
+        }
+        Commands::ListMethods => {
+            println!("\nMethods:");
+            Method::list_all();
+        }
+        Commands::ListMadhab => {
+            println!("\nMadhab:");
+            Madhab::list_all();
+        }
+        Commands::DryRunNotification => {
+            let next_prayer = prayers::next(&config);
+            notify_prayer(&next_prayer, &config);
+        }
     }
 }

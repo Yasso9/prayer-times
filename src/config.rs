@@ -1,3 +1,4 @@
+use crate::arguments::Commands;
 use crate::madhab::Madhab;
 use crate::method::Method;
 use crate::notification_urgency::NotifUrgency;
@@ -27,6 +28,7 @@ struct PrayerConfig {
 struct NotificationConfig {
     notify_before: bool,
     urgency: NotifUrgency,
+    interval: u64,
 }
 #[derive(Serialize, Deserialize)]
 pub struct Config {
@@ -51,6 +53,7 @@ impl Default for Config {
             notification: NotificationConfig {
                 notify_before: false,
                 urgency: NotifUrgency::Critical,
+                interval: 20,
             },
         }
     }
@@ -89,7 +92,6 @@ fn current_location() -> Option<Location> {
 impl Config {
     // Generate a new Config from command line arguments
     pub fn new(args: &Arguments) -> Self {
-        // let args = Arguments::parse();
         // println!("{:?}", args);
 
         let config: Config = confy::load("prayer-times", "config").unwrap_or_default();
@@ -108,7 +110,18 @@ impl Config {
             panic!("No location provided in config file and impossible to get it automatically");
         }
 
-        // let &arg_method: &Option<Method> = &(args.method);
+        let mut interval = config.notification.interval;
+        if let Some(command) = &args.command {
+            if let Commands::Deamon(deamon) = command {
+                if deamon.interval.is_some() {
+                    interval = deamon.interval.unwrap();
+                }
+            }
+        }
+        if interval == 0 {
+            interval = 1;
+            println!("Interval cannot be 0, setting it to 1 the minimum value");
+        }
 
         Self {
             location,
@@ -126,6 +139,7 @@ impl Config {
                     .notify_before
                     .unwrap_or(config.notification.notify_before),
                 urgency: args.urgency.clone().unwrap_or(config.notification.urgency),
+                interval,
             },
         }
     }
@@ -169,5 +183,8 @@ impl Config {
     pub fn urgency(&self) -> Urgency {
         // TODO : why do I need clone here
         self.notification.urgency.clone().into()
+    }
+    pub fn interval(&self) -> u64 {
+        self.notification.interval
     }
 }

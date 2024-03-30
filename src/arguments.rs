@@ -1,6 +1,7 @@
 use crate::madhab::Madhab;
 use crate::method::Method;
 use crate::notification_urgency::NotifUrgency;
+use clap::Args;
 use clap::Parser;
 use clap::Subcommand;
 
@@ -54,8 +55,8 @@ pub struct Arguments {
 
 #[derive(Subcommand)]
 pub enum Commands {
-    /// Start the deamon that will send notifications on prayers time [default]
-    Deamon,
+    /// Start the process that will send notifications on prayers time [default]
+    Deamon(DeamonArgs),
     /// Get the current prayer
     Current,
     /// Get the next prayer
@@ -72,6 +73,13 @@ pub enum Commands {
 // give default implementation
 impl Default for Commands {
     fn default() -> Self {
-        Self::Deamon
+        Self::Deamon(DeamonArgs { interval: None })
     }
+}
+
+#[derive(Args)]
+pub struct DeamonArgs {
+    /// Interval in seconds for checking new prayers
+    #[arg(short, long)]
+    pub interval: Option<u64>,
 }
