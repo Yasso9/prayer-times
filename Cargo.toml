@@ -1,18 +1,24 @@
 [package]
 name = "prayer-times"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Ilyas Turki <turki.ilyass@gmail.com>"]
 edition = "2021"
-description = "Islamic Prayer Times Notification"
+description = "Islamic Prayer Times Information"
 readme = "README.md"
 homepage = "https://github.com/Yasso9/prayer-times"
 repository = "https://github.com/Yasso9/prayer-times"
 license = "MIT"
-exclude = ["/.vscode/", "/PKGBUILD"]
+exclude = ["/PKGBUILD"]
 
 [dependencies]
 chrono = "0.4.31"
 clap = { version = "4.4.14", features = ["derive"] }
+confy = "0.6.1"
+dirs = "5.0.1"
+geolocation = "0.2.1"
+get_if_addrs = "0.5.3"
 notify-rust = "4.10.0"
+serde = "1.0.196"
 strum = "0.25.0"
 strum_macros = "0.25.3"
+toml = "0.8.10"

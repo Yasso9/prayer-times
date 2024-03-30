@@ -1,184 +1,132 @@
-use clap::Parser;
+use crate::madhab::Madhab;
+use crate::method::Method;
+use crate::notification_urgency::NotifUrgency;
+use crate::Arguments;
+
 use notify_rust::Urgency;
-use strum_macros::EnumString;
+use serde::Deserialize;
+use serde::Serialize;
 
-/// Program to notify prayer times
-#[derive(Parser, Debug)]
-#[command(name = "prayer-times")]
-// Read from `Cargo.toml`
-#[command(author, version, about, long_about = None)]
-struct Arguments {
-    /// Latitude. Defaults to the current location
-    #[arg(short = 'l', long)]
-    latitude: f64,
-    /// Longitude. Defaults to the current location
-    #[arg(short = 'L', long)]
-    longitude: f64,
-
-    /// Calculation Method to use
-    #[arg(short = 'm', long, default_value = "MuslimWorldLeague")]
-    method: Method,
-    /// Madhab to use
-    #[arg(short = 'M', long, default_value = "Shafi")]
-    madhab: Madhab,
-
-    /// Minutes to add or remove to the Fajr time
-    #[arg(long, default_value_t = 0)]
-    fajr_mod: i8,
-    /// Minutes to add or remove to the Dohr time
-    #[arg(long, default_value_t = 0)]
-    dohr_mod: i8,
-    /// Minutes to add or remove to the Asr time
-    #[arg(long, default_value_t = 0)]
-    asr_mod: i8,
-    /// Minutes to add or remove to the Maghrib time
-    #[arg(long, default_value_t = 3)]
-    maghrib_mod: i8,
-    /// Minutes to add or remove to the Isha time
-    #[arg(long, default_value_t = 0)]
-    isha_mod: i8,
-
-    /// Show notification 10 minutes before prayer time
-    #[arg(long, default_value_t = true)]
-    notify_before: bool,
-
-    /// Notification urgency
-    #[arg(long, default_value = "Critical")]
-    urgency: NotifUrgency,
-}
-
-#[derive(Debug, Clone, EnumString)]
-enum NotifUrgency {
-    Low,
-    Normal,
-    Critical,
-}
-impl Default for NotifUrgency {
-    fn default() -> Self {
-        NotifUrgency::Critical
-    }
-}
-impl From<NotifUrgency> for Urgency {
-    fn from(urgency: NotifUrgency) -> Self {
-        match urgency {
-            NotifUrgency::Low => Urgency::Low,
-            NotifUrgency::Normal => Urgency::Normal,
-            NotifUrgency::Critical => Urgency::Critical,
-        }
-    }
-}
-
+#[derive(Serialize, Deserialize)]
 struct Location {
     lat: f64,
     lon: f64,
 }
 
-#[derive(Debug, Clone, EnumString)]
-enum Method {
-    MuslimWorldLeague,
-    NorthAmerica,
-    Egyptian,
-    UmmAlQura,
-    Karachi,
-    Tehran,
-    Jafari,
-    FranceUOIF,
-    FranceGMP,
-    // Gulf,
-    // Kuwait,
-    // Qatar,
-    // Singapore,
-    // France18,
-    // Turkey,
-    // Russia,
-    // Tunisia,
-    // Algeria,
-    // Indonesia,
-    // Morocco,
-    // Lisboa,
+#[derive(Serialize, Deserialize)]
+struct PrayerConfig {
+    method: Method,
+    madhab: Madhab,
+    fajr_mod: i8,
+    dohr_mod: i8,
+    asr_mod: i8,
+    maghrib_mod: i8,
+    isha_mod: i8,
 }
-impl Method {
-    fn fajr_angle(&self) -> f64 {
-        match self {
-            Method::MuslimWorldLeague => 18.,
-            Method::NorthAmerica => 15.,
-            Method::Egyptian => 19.5,
-            Method::UmmAlQura => 18.5,
-            Method::Karachi => 18.,
-            Method::Tehran => 17.7,
-            Method::Jafari => 16.,
-            Method::FranceUOIF => 12.,
-            Method::FranceGMP => 18.,
-        }
-    }
-    fn isha_angle(&self) -> f64 {
-        match self {
-            Method::MuslimWorldLeague => 17.,
-            Method::NorthAmerica => 15.,
-            Method::Egyptian => 17.5,
-            Method::UmmAlQura => 18.5, // Wrong
-            Method::Karachi => 18.,
-            Method::Tehran => 14.,
-            Method::Jafari => 14.,
-            Method::FranceUOIF => 12.,
-            Method::FranceGMP => 18.,
-        }
-    }
-    // Set maghrib and midnight
+#[derive(Serialize, Deserialize)]
+struct NotificationConfig {
+    notify_before: bool,
+    urgency: NotifUrgency,
 }
-impl Default for Method {
+#[derive(Serialize, Deserialize)]
+pub struct Config {
+    location: Location,
+    prayer: PrayerConfig,
+    notification: NotificationConfig,
+}
+
+impl Default for Config {
     fn default() -> Self {
-        Method::MuslimWorldLeague
+        Self {
+            location: Location { lat: 0., lon: 0. },
+            prayer: PrayerConfig {
+                method: Method::default(),
+                madhab: Madhab::default(),
+                fajr_mod: 0,
+                dohr_mod: 0,
+                asr_mod: 0,
+                maghrib_mod: 0,
+                isha_mod: 0,
+            },
+            notification: NotificationConfig {
+                notify_before: false,
+                urgency: NotifUrgency::Critical,
+            },
+        }
     }
 }
 
-#[derive(Debug, Clone, EnumString)]
-enum Madhab {
-    Shafi,
-    Hanafi,
-}
-impl Madhab {
-    fn shadow_multiplier(&self) -> u8 {
-        match self {
-            Madhab::Shafi => 1,
-            Madhab::Hanafi => 2,
+fn public_ip() -> Option<String> {
+    let mut ip = None;
+    // List all of the machine's network interfaces
+    for iface in get_if_addrs::get_if_addrs().ok()? {
+        if iface.is_loopback() {
+            continue;
         }
+        let ip_addr = iface.ip().to_string();
+        if ip_addr.starts_with("192.168") {
+            continue;
+        }
+        // println!("IP : {:#?}", iface.ip());
+        ip = Some(ip_addr);
+        // println!("IP : {:#?}", iface.type_id());
+        // println!("{:#?}", iface.is_loopback());
     }
+
+    ip
 }
-impl Default for Madhab {
-    fn default() -> Self {
-        Madhab::Shafi
-    }
+
+fn current_location() -> Option<Location> {
+    let info = geolocation::find(public_ip()?.as_str()).ok()?;
+    let lat: Result<f64, _> = info.latitude.parse();
+    let lon: Result<f64, _> = info.longitude.parse();
+    Some(Location {
+        lat: lat.ok()?,
+        lon: lon.ok()?,
+    })
 }
-pub struct Config {
-    location: Location,
-    method: Method,
-    madhab: Madhab,
-    time_mod: [i8; 5],
-    notify_before: bool,
-    urgency: Urgency,
-}
+
 impl Config {
     // Generate a new Config from command line arguments
-    pub fn new() -> Self {
-        let args = Arguments::parse();
+    pub fn new(args: &Arguments) -> Self {
+        // let args = Arguments::parse();
         // println!("{:?}", args);
+
+        let config: Config = confy::load("prayer-times", "config").unwrap_or_default();
+
+        let location: Location;
+        if let (Some(latitude), Some(longitude)) = (args.latitude, args.longitude) {
+            location = Location {
+                lat: latitude,
+                lon: longitude,
+            };
+        } else if config.location.lat != 0. && config.location.lon != 0. {
+            location = config.location;
+        } else if let Some(auto_location) = current_location() {
+            location = auto_location;
+        } else {
+            panic!("No location provided in config file and impossible to get it automatically");
+        }
+
+        // let &arg_method: &Option<Method> = &(args.method);
+
         Self {
-            location: Location {
-                lat: args.latitude,
-                lon: args.longitude,
+            location,
+            prayer: PrayerConfig {
+                method: args.method.clone().unwrap_or(config.prayer.method),
+                madhab: args.madhab.clone().unwrap_or(config.prayer.madhab),
+                fajr_mod: args.fajr_mod.unwrap_or(config.prayer.fajr_mod),
+                dohr_mod: args.dohr_mod.unwrap_or(config.prayer.dohr_mod),
+                asr_mod: args.asr_mod.unwrap_or(config.prayer.asr_mod),
+                maghrib_mod: args.maghrib_mod.unwrap_or(config.prayer.maghrib_mod),
+                isha_mod: args.isha_mod.unwrap_or(config.prayer.isha_mod),
             },
-            method: args.method,
-            madhab: args.madhab,
-            time_mod: [
-                args.fajr_mod,
-                args.dohr_mod,
-                args.asr_mod,
-                args.maghrib_mod,
-                args.isha_mod,
-            ],
-            notify_before: args.notify_before,
-            urgency: args.urgency.into(),
+            notification: NotificationConfig {
+                notify_before: args
+                    .notify_before
+                    .unwrap_or(config.notification.notify_before),
+                urgency: args.urgency.clone().unwrap_or(config.notification.urgency),
+            },
         }
     }
 
@@ -190,35 +138,36 @@ impl Config {
     }
 
     pub fn fajr(&self) -> f64 {
-        self.method.fajr_angle()
+        self.prayer.method.fajr_angle() * 60.
     }
     pub fn isha(&self) -> f64 {
-        self.method.isha_angle()
+        self.prayer.method.isha_angle()
     }
     pub fn shadow_multiplier(&self) -> u8 {
-        self.madhab.shadow_multiplier()
+        self.prayer.madhab.shadow_multiplier()
     }
 
     pub fn fajr_offset(&self) -> f64 {
-        self.time_mod[0] as f64 / 60.
+        self.prayer.fajr_mod as f64 / 60.
     }
     pub fn dhuhr_offset(&self) -> f64 {
-        self.time_mod[1] as f64 / 60.
+        self.prayer.dohr_mod as f64 / 60.
     }
     pub fn asr_offset(&self) -> f64 {
-        self.time_mod[2] as f64 / 60.
+        self.prayer.asr_mod as f64 / 60.
     }
     pub fn maghrib_offset(&self) -> f64 {
-        self.time_mod[3] as f64 / 60.
+        self.prayer.maghrib_mod as f64 / 60.
     }
     pub fn isha_offset(&self) -> f64 {
-        self.time_mod[4] as f64 / 60.
+        self.prayer.isha_mod as f64 / 60.
     }
 
     pub fn notify_before(&self) -> bool {
-        self.notify_before
+        self.notification.notify_before
     }
     pub fn urgency(&self) -> Urgency {
-        self.urgency
+        // TODO : why do I need clone here
+        self.notification.urgency.clone().into()
     }
 }

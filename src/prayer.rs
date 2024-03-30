@@ -17,33 +17,24 @@ pub fn get_prayer(enum_prayer: Event, date: NaiveDate, config: &Config) -> Praye
         NaiveDateTime::new(date, naive_time.expect("Error in prayer calculation"))
     }
 
-    // let config = Config::new();
     let dhuhr = dhuhr(date, &config);
 
-    let time;
-
-    match enum_prayer {
+    let time = match enum_prayer {
         Event::Fajr => {
-            time = dhuhr - solar_time_adjustment(date, config.lat(), config.fajr())
-                + config.fajr_offset();
+            dhuhr - solar_time_adjustment(date, config.lat(), config.fajr()) + config.fajr_offset()
         }
-        Event::Dhuhr => {
-            time = dhuhr + config.dhuhr_offset();
-        }
+        Event::Dhuhr => dhuhr + config.dhuhr_offset(),
         Event::Asr => {
-            time =
-                dhuhr + asr(date, config.lat(), config.shadow_multiplier()) + config.asr_offset();
+            dhuhr + asr(date, config.lat(), config.shadow_multiplier()) + config.asr_offset()
         }
         Event::Maghrib => {
             let sunset = dhuhr + solar_time_adjustment(date, config.lat(), 0.833);
-            time = sunset + config.maghrib_offset();
+            sunset + config.maghrib_offset()
         }
         Event::Isha => {
-            time = dhuhr
-                + solar_time_adjustment(date, config.lat(), config.isha())
-                + config.isha_offset();
+            dhuhr + solar_time_adjustment(date, config.lat(), config.isha()) + config.isha_offset()
         }
-    }
+    };
 
     Prayer {
         event: enum_prayer,
@@ -75,7 +66,7 @@ impl Prayer {
             .date()
             .checked_sub_days(Days::new(1))
             .unwrap();
-        return get_prayer(self.event.previous(), previous_date, config);
+        get_prayer(self.event.previous(), previous_date, config)
     }
 
     pub fn next(&self, config: &Config) -> Prayer {
@@ -89,7 +80,7 @@ impl Prayer {
             .date()
             .checked_add_days(Days::new(1))
             .unwrap();
-        return get_prayer(self.event.next(), next_date, config);
+        get_prayer(self.event.next(), next_date, config)
     }
 
     // Returns the time remaining for the next prayer to happen
