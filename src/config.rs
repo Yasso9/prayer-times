@@ -89,12 +89,19 @@ fn current_location() -> Option<Location> {
     })
 }
 
+pub fn config_options<'a>() -> (&'a str, &'a str) {
+    const PROGRAM_NAME: &str = env!("CARGO_PKG_NAME");
+    (PROGRAM_NAME, "config")
+}
+
 impl Config {
     // Generate a new Config from command line arguments
     pub fn new(args: &Arguments) -> Self {
         // println!("{:?}", args);
 
-        let config: Config = confy::load("prayer-times", "config").unwrap_or_default();
+        // TODO: get prayer-times from
+        let (program, config) = config_options();
+        let config: Config = confy::load(program, config).unwrap_or_default();
 
         let location: Location;
         if let (Some(latitude), Some(longitude)) = (args.latitude, args.longitude) {

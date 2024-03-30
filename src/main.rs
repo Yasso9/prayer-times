@@ -88,5 +88,17 @@ fn main() {
             let next_prayer = prayers::next(&config);
             notify_prayer(&next_prayer, &config);
         }
+        Commands::Config => {
+            let (program, config) = config::config_options();
+            let result = confy::get_configuration_file_path(program, config);
+            match result {
+                Ok(path) => {
+                    println!("Config file: {}", path.display());
+                }
+                Err(e) => {
+                    println!("Error reading config file: {}", e);
+                }
+            }
+        }
     }
 }

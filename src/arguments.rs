@@ -69,6 +69,8 @@ pub enum Commands {
     ListMadhab,
     /// Show the next prayer in a notification to test if everything works
     DryRunNotification,
+    /// Path of the toml config file
+    Config,
 }
 // give default implementation
 impl Default for Commands {
