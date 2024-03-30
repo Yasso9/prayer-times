@@ -1,8 +1,9 @@
 [package]
-name = "prayer-time"
-version = "0.1.0"
-edition = "2021"
+name = "prayer-times"
 description = "Islamic Prayer Times Notification"
+version = "0.1.0"
+authors = ["Ilyas Turki"]
+edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
