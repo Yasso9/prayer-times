@@ -1,8 +1,11 @@
 use serde::Deserialize;
 use serde::Serialize;
+use strum::IntoEnumIterator;
+use strum_macros::Display;
+use strum_macros::EnumIter;
 use strum_macros::EnumString;
 
-#[derive(Debug, Clone, EnumString, Serialize, Deserialize)]
+#[derive(Debug, Clone, EnumString, Serialize, Deserialize, EnumIter, Display)]
 pub enum Method {
     MuslimWorldLeague,
     NorthAmerica,
@@ -51,6 +54,17 @@ impl Method {
             Method::Jafari => 14.,
             Method::FranceUOIF => 12.,
             Method::FranceGMP => 18.,
+        }
+    }
+
+    pub fn list_all() {
+        for variant in Method::iter() {
+            println!(
+                "{} : [ fajr angle: {}, isha angle: {} ]",
+                variant,
+                variant.fajr_angle(),
+                variant.isha_angle()
+            );
         }
     }
 }

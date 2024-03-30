@@ -11,7 +11,7 @@ use clap::Subcommand;
 #[command(author, version, about, long_about = None)]
 pub struct Arguments {
     #[command(subcommand)]
-    pub command: Commands,
+    pub command: Option<Commands>,
 
     /// Latitude. Defaults to the current location
     #[arg(short = 'l', long)]
@@ -61,7 +61,13 @@ pub enum Commands {
     /// Get the next prayer
     Next,
     /// List all the prayers of the current day
-    List,
+    ListPrayers,
+    /// List all methods available for the calculation of the prayer times
+    ListMethods,
+    /// List all madhab available for the calculation of the prayer times
+    ListMadhab,
+    /// Show the next prayer in a notification to test if everything works
+    DryRunNotification,
 }
 // give default implementation
 impl Default for Commands {

@@ -13,17 +13,19 @@ use self::{
     arguments::Arguments,
     arguments::Commands,
     config::Config,
+    madhab::Madhab,
+    method::Method,
     notification::{notify_before_prayer, notify_prayer},
 };
+
 use clap::Parser;
 
 fn main() {
     let args = Arguments::parse();
     let config = Config::new(&args);
 
-    println!("{:?}", args.urgency);
-
-    match args.command {
+    match args.command.unwrap_or_default() {
+        Commands::Deamon => {}
         Commands::Current => {
             let prayer = prayers::current(&config);
             println!("{}", prayer.text_time());
@@ -34,27 +36,34 @@ fn main() {
             println!("{}", prayer.text_time());
             return;
         }
-        Commands::List => {
+        Commands::ListPrayers => {
             println!("\nPrayer times:");
             for prayer in prayers::list_prayers(&config) {
                 println!("{}", prayer.text_time());
             }
             return;
         }
-        Commands::Deamon => {
-            println!("Starting Prayer Time Daemon");
+        Commands::ListMethods => {
+            println!("\nMethods:");
+            Method::list_all();
+            return;
+        }
+        Commands::ListMadhab => {
+            println!("\nMadhab:");
+            Madhab::list_all();
+            return;
+        }
+        Commands::DryRunNotification => {
+            let next_prayer = prayers::next(&config);
+            notify_prayer(&next_prayer, &config);
+            return;
         }
     }
 
     let mut next_prayer = prayers::next(&config);
-
-    // For test purpose
-    // if cfg!(debug_assertions) {
-    //     notify_prayer(&next_prayer, &config);
-    // }
-
     let mut is_notified_before = false;
 
+    // TODO: put the for loop inside the Deamon match enum
     println!("Starting Prayer Time Daemon");
     println!("Waiting for next prayer...");
     loop {
@@ -65,7 +74,7 @@ fn main() {
             println!("Prayer time has passed");
             // Notification only if it's the current prayer.
             // If it's not the current prayer, it means that the system have been suspended
-            // so we Are currently in an other prayer
+            // so we are currently in an other prayer
             if next_prayer == prayers::current(&config) {
                 notify_prayer(&next_prayer, &config);
             }
@@ -81,7 +90,6 @@ fn main() {
             is_notified_before = true;
         }
 
-        println!("Sleeping...");
         std::thread::sleep(std::time::Duration::from_secs(20));
     }
 }
