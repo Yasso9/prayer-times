@@ -1,4 +1,6 @@
 use crate::arguments::Commands;
+use crate::location::current_location;
+use crate::location::Location;
 use crate::madhab::Madhab;
 use crate::method::Method;
 use crate::notification_urgency::NotifUrgency;
@@ -7,12 +9,6 @@ use crate::Arguments;
 use notify_rust::Urgency;
 use serde::Deserialize;
 use serde::Serialize;
-
-#[derive(Serialize, Deserialize)]
-struct Location {
-    lat: f64,
-    lon: f64,
-}
 
 #[derive(Serialize, Deserialize)]
 struct PrayerConfig {
@@ -59,36 +55,6 @@ impl Default for Config {
     }
 }
 
-fn public_ip() -> Option<String> {
-    let mut ip = None;
-    // List all of the machine's network interfaces
-    for iface in get_if_addrs::get_if_addrs().ok()? {
-        if iface.is_loopback() {
-            continue;
-        }
-        let ip_addr = iface.ip().to_string();
-        if ip_addr.starts_with("192.168") {
-            continue;
-        }
-        // println!("IP : {:#?}", iface.ip());
-        ip = Some(ip_addr);
-        // println!("IP : {:#?}", iface.type_id());
-        // println!("{:#?}", iface.is_loopback());
-    }
-
-    ip
-}
-
-fn current_location() -> Option<Location> {
-    let info = geolocation::find(public_ip()?.as_str()).ok()?;
-    let lat: Result<f64, _> = info.latitude.parse();
-    let lon: Result<f64, _> = info.longitude.parse();
-    Some(Location {
-        lat: lat.ok()?,
-        lon: lon.ok()?,
-    })
-}
-
 pub fn config_options<'a>() -> (&'a str, &'a str) {
     const PROGRAM_NAME: &str = env!("CARGO_PKG_NAME");
     (PROGRAM_NAME, "config")
@@ -103,23 +69,11 @@ impl Config {
         let (program, config) = config_options();
         let config: Config = confy::load(program, config).unwrap_or_default();
 
-        let location: Location;
-        if let (Some(latitude), Some(longitude)) = (args.latitude, args.longitude) {
-            location = Location {
-                lat: latitude,
-                lon: longitude,
-            };
-        } else if config.location.lat != 0. && config.location.lon != 0. {
-            location = config.location;
-        } else if let Some(auto_location) = current_location() {
-            location = auto_location;
-        } else {
-            panic!("No location provided in config file and impossible to get it automatically");
-        }
-
+        let mut is_deamon = false;
         let mut interval = config.notification.interval;
         if let Some(command) = &args.command {
             if let Commands::Deamon(deamon) = command {
+                is_deamon = true;
                 if deamon.interval.is_some() {
                     interval = deamon.interval.unwrap();
                 }
@@ -128,6 +82,20 @@ impl Config {
         if interval == 0 {
             interval = 1;
             println!("Interval cannot be 0, setting it to 1 the minimum value");
+        }
+
+        let location: Location;
+        if let (Some(latitude), Some(longitude)) = (args.latitude, args.longitude) {
+            location = Location {
+                lat: latitude,
+                lon: longitude,
+            };
+        } else if config.location.lat != 0. && config.location.lon != 0. {
+            location = config.location;
+        } else if let Some(auto_location) = current_location(is_deamon) {
+            location = auto_location;
+        } else {
+            panic!("No location provided in config file and impossible to get it automatically");
         }
 
         Self {

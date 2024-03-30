@@ -2,6 +2,7 @@ mod arguments;
 mod calculations;
 mod config;
 mod event;
+mod location;
 mod madhab;
 mod method;
 mod notification;
@@ -71,17 +72,17 @@ fn main() {
             println!("{}", prayer.text_time());
         }
         Commands::ListPrayers => {
-            println!("\nPrayer times:");
+            println!("Prayer times:");
             for prayer in prayers::list_prayers(&config) {
                 println!("{}", prayer.text_time());
             }
         }
         Commands::ListMethods => {
-            println!("\nMethods:");
+            println!("Methods:");
             Method::list_all();
         }
         Commands::ListMadhab => {
-            println!("\nMadhab:");
+            println!("Madhab:");
             Madhab::list_all();
         }
         Commands::DryRunNotification => {

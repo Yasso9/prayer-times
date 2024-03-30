@@ -27,7 +27,12 @@ pub struct Arguments {
     /// Madhab to use
     #[arg(short = 'M', long)]
     pub madhab: Option<Madhab>,
-
+    // /// Custom Fajr angle
+    // #[arg(long)]
+    // pub fajr_angle: Option<f64>,
+    // /// Custom Isha angle
+    // #[arg(long)]
+    // pub isha_angle: Option<f64>,
     /// Minutes to add or remove to the Fajr time
     #[arg(long)]
     pub fajr_mod: Option<i8>,
