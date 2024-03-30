@@ -47,7 +47,7 @@ fn background_process(config: &Config) {
             && !is_notified_before
             && next_prayer.time_remaining() < chrono::Duration::minutes(11)
         {
-            notify_before_prayer(&next_prayer, next_prayer.time_remaining());
+            notify_before_prayer(&next_prayer, next_prayer.time_remaining(), config);
             is_notified_before = true;
         }
 
@@ -85,7 +85,7 @@ fn main() {
             println!("Madhab:");
             Madhab::list_all();
         }
-        Commands::DryRunNotification => {
+        Commands::DryRun => {
             let next_prayer = prayers::next(&config);
             notify_prayer(&next_prayer, &config);
         }

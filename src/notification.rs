@@ -3,30 +3,17 @@ use crate::prayer::Prayer;
 use notify_rust::{Notification, Urgency};
 use std::path::PathBuf;
 
-// Get the icon of the notification that should be sent
-fn get_icon() -> Result<PathBuf, std::io::Error> {
-    let asset_path = if cfg!(debug_assertions) {
-        let current_dir = std::env::current_dir()?;
-        current_dir.join("assets")
-    } else {
-        PathBuf::from("/usr/share/icons")
-    };
-
-    Ok(asset_path.join("mosque-svgrepo-com.png"))
-}
-
-fn send_notification(summary: String, urgency: Urgency) {
+fn send_notification(summary: String, urgency: Urgency, icon: PathBuf) {
     let mut notification = Notification::new(); // so the notification will live
     let notification = notification.summary(&summary).urgency(urgency);
 
-    match get_icon() {
-        Ok(icon_path) => match icon_path.to_str() {
-            Some(icon_path) => {
-                notification.icon(icon_path);
-            }
-            None => println!("Failed to get icon path"),
-        },
-        Err(_) => println!("Failed to get icon path"),
+    // ne pas faire un expect mais un simple if suffit
+    let full_path = std::fs::canonicalize(icon).expect("Failed to resolve icon path");
+    if let Some(icon_str) = full_path.to_str() {
+        println!("Setting icon for notification: {}", icon_str);
+        notification.icon(icon_str);
+    } else {
+        println!("Failed to set icon for notification");
     }
 
     match notification.show() {
@@ -37,14 +24,14 @@ fn send_notification(summary: String, urgency: Urgency) {
 
 pub fn notify_prayer(prayer: &Prayer, config: &Config) {
     let summary = format!("Adhan {}", prayer.event());
-    send_notification(summary, config.urgency());
+    send_notification(summary, config.urgency(), config.icon());
 }
 
-pub fn notify_before_prayer(prayer: &Prayer, duration: chrono::Duration) {
+pub fn notify_before_prayer(prayer: &Prayer, duration: chrono::Duration, config: &Config) {
     let summary = format!(
         "Adhan {} in {} minutes",
         prayer.event(),
         duration.num_minutes()
     );
-    send_notification(summary, Urgency::Low);
+    send_notification(summary, Urgency::Low, config.icon());
 }

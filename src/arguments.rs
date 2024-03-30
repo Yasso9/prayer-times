@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use crate::madhab::Madhab;
 use crate::method::Method;
 use crate::notification_urgency::NotifUrgency;
@@ -90,6 +92,9 @@ pub struct Arguments {
     /// Show notification 10 minutes before prayer time [default: false]
     #[arg(long)]
     pub notify_before: Option<bool>,
+    /// Custom icon path for notifications
+    #[arg(long)]
+    pub icon: Option<PathBuf>,
 
     /// Notification urgency
     #[arg(long)]
@@ -111,7 +116,7 @@ pub enum Commands {
     /// List all madhab available for the calculation of the prayer times
     ListMadhab,
     /// Show the next prayer in a notification to test if everything works
-    DryRunNotification,
+    DryRun,
     /// Path of the toml config file
     Config,
 }

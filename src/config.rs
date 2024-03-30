@@ -1,3 +1,5 @@
+use std::path;
+
 use crate::arguments::Commands;
 use crate::location::current_location;
 use crate::location::Location;
@@ -24,6 +26,7 @@ struct PrayerConfig {
 struct NotificationConfig {
     notify_before: bool,
     urgency: NotifUrgency,
+    icon: path::PathBuf,
     interval: u64,
 }
 #[derive(Serialize, Deserialize)]
@@ -31,6 +34,24 @@ pub struct Config {
     location: Location,
     prayer: PrayerConfig,
     notification: NotificationConfig,
+}
+
+// Get the icon of the notification that should be sent
+fn default_icon() -> path::PathBuf {
+    let asset_path = if cfg!(debug_assertions) {
+        let current_dir = std::env::current_dir();
+        match current_dir {
+            Ok(dir) => dir.join("assets"),
+            Err(_) => {
+                println!("Failed to get current dir");
+                path::PathBuf::from("./assets")
+            }
+        }
+    } else {
+        path::PathBuf::from("/usr/share/icons")
+    };
+
+    asset_path.join("mosque-svgrepo-com.png")
 }
 
 impl Default for Config {
@@ -49,6 +70,7 @@ impl Default for Config {
             notification: NotificationConfig {
                 notify_before: false,
                 urgency: NotifUrgency::Critical,
+                icon: default_icon(),
                 interval: 20,
             },
         }
@@ -111,6 +133,7 @@ impl Config {
                 notify_before: args
                     .notify_before
                     .unwrap_or(config.notification.notify_before),
+                icon: args.icon.clone().unwrap_or(config.notification.icon),
                 urgency: args.urgency.clone().unwrap_or(config.notification.urgency),
                 interval,
             },
@@ -156,6 +179,9 @@ impl Config {
     pub fn urgency(&self) -> Urgency {
         // TODO : why do I need clone here
         self.notification.urgency.clone().into()
+    }
+    pub fn icon(&self) -> path::PathBuf {
+        self.notification.icon.clone()
     }
     pub fn interval(&self) -> u64 {
         self.notification.interval
