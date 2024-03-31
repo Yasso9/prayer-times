@@ -119,7 +119,7 @@ pub enum Commands {
     ListMadhab,
     /// Show the next prayer in a notification to test if everything works
     DryRun,
-    /// Path of the toml config file
+    /// Get the path of the toml config file
     Config,
     /// Generate shell completions and man pages
     GenerateShell,
