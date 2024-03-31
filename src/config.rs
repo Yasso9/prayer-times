@@ -38,20 +38,13 @@ pub struct Config {
 
 // Get the icon of the notification that should be sent
 fn default_icon() -> path::PathBuf {
-    let asset_path = if cfg!(debug_assertions) {
-        let current_dir = std::env::current_dir();
-        match current_dir {
-            Ok(dir) => dir.join("assets"),
-            Err(_) => {
-                println!("Failed to get current dir");
-                path::PathBuf::from("./assets")
-            }
-        }
+    let assets_path = if cfg!(debug_assertions) {
+        path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("assets")
     } else {
         path::PathBuf::from("/usr/share/icons")
     };
 
-    asset_path.join("mosque-svgrepo-com.png")
+    assets_path.join("mosque-svgrepo-com.png")
 }
 
 impl Default for Config {

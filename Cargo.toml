@@ -3,7 +3,7 @@ name = "prayer-times"
 version = "0.2.0"
 authors = ["Ilyas Turki <turki.ilyass@gmail.com>"]
 edition = "2021"
-description = "Islamic Prayer Times Information"
+description = "Islamic Prayer Times Informations and Notifications"
 readme = "README.md"
 homepage = "https://github.com/Yasso9/prayer-times"
 repository = "https://github.com/Yasso9/prayer-times"
@@ -13,6 +13,7 @@ exclude = ["/PKGBUILD"]
 [dependencies]
 chrono = "0.4.31"
 clap = { version = "4.4.14", features = ["derive"] }
+clap_complete = "4.5.1"
 confy = "0.6.1"
 geolocation = "0.2.1"
 get_if_addrs = "0.5.3"

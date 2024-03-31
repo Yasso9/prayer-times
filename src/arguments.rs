@@ -1,3 +1,5 @@
+pub mod generation;
+
 use std::path::PathBuf;
 
 use crate::madhab::Madhab;
@@ -119,6 +121,8 @@ pub enum Commands {
     DryRun,
     /// Path of the toml config file
     Config,
+    /// Generate shell completions and man pages
+    GenerateShell,
 }
 // give default implementation
 impl Default for Commands {

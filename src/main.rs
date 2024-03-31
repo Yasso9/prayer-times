@@ -11,6 +11,7 @@ mod prayer;
 mod prayers;
 
 use self::{
+    arguments::generation::generate,
     arguments::Arguments,
     arguments::Commands,
     config::Config,
@@ -19,14 +20,15 @@ use self::{
     notification::{notify_before_prayer, notify_prayer},
 };
 
+// Use argument::parse() inside the argument module so we don't include this
 use clap::Parser;
 
 fn background_process(config: &Config) {
     let mut next_prayer = prayers::next(config);
     let mut is_notified_before = false;
 
-    println!("Starting Prayer Time Daemon");
-    println!("Waiting for next prayer...");
+    println!("Starting Prayer Time Background Process");
+    println!("Waiting for next prayer time...");
     loop {
         println!("{}", next_prayer.text_duration());
         println!("{}", next_prayer.text_time());
@@ -69,7 +71,7 @@ fn main() {
         }
         Commands::Next => {
             let prayer = prayers::next(&config);
-            println!("{}", prayer.text_time());
+            println!("{}", prayer.text_duration());
         }
         Commands::ListPrayers => {
             println!("Prayer times:");
@@ -101,5 +103,6 @@ fn main() {
                 }
             }
         }
+        Commands::GenerateShell => generate(),
     }
 }
