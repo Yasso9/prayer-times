@@ -108,7 +108,11 @@ impl Config {
         } else if let Some(auto_location) = current_location(is_deamon) {
             location = auto_location;
         } else {
-            panic!("No location provided in config file and impossible to get it automatically");
+            // panic!("No location provided in config file and impossible to get it automatically");
+            println!("No location provided in arguments or config file and impossible to get it automatically");
+            println!("Run the program using the latitude and longitude arguments or set them in the config file");
+            println!("Example : {} --latitude <LAT> --longitude <LON>", program);
+            std::process::exit(1);
         }
 
         Self {

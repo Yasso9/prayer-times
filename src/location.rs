@@ -11,6 +11,7 @@ fn public_ip() -> Option<String> {
     let mut ip = None;
     // List all of the machine's network interfaces
     for iface in get_if_addrs::get_if_addrs().ok()? {
+        // println!("IP Found : {:#?}", iface.ip());
         if iface.is_loopback() {
             continue;
         }
