@@ -1,6 +1,7 @@
 use std::path;
 
 use crate::arguments::Commands;
+use crate::event::Event;
 use crate::location::current_location;
 use crate::location::Location;
 use crate::madhab::Madhab;
@@ -17,6 +18,7 @@ struct PrayerConfig {
     method: Method,
     madhab: Madhab,
     fajr_mod: i8,
+    shourouk_mod: i8,
     dohr_mod: i8,
     asr_mod: i8,
     maghrib_mod: i8,
@@ -55,6 +57,7 @@ impl Default for Config {
                 method: Method::default(),
                 madhab: Madhab::default(),
                 fajr_mod: 0,
+                shourouk_mod: 0,
                 dohr_mod: 0,
                 asr_mod: 0,
                 maghrib_mod: 0,
@@ -108,7 +111,6 @@ impl Config {
         } else if let Some(auto_location) = current_location(is_deamon) {
             location = auto_location;
         } else {
-            // panic!("No location provided in config file and impossible to get it automatically");
             println!("No location provided in arguments or config file and impossible to get it automatically");
             println!("Run the program using the latitude and longitude arguments or set them in the config file");
             println!("Example : {} --latitude <LAT> --longitude <LON>", program);
@@ -121,6 +123,7 @@ impl Config {
                 method: args.method.clone().unwrap_or(config.prayer.method),
                 madhab: args.madhab.clone().unwrap_or(config.prayer.madhab),
                 fajr_mod: args.fajr_mod.unwrap_or(config.prayer.fajr_mod),
+                shourouk_mod: args.shourouk_mod.unwrap_or(config.prayer.shourouk_mod),
                 dohr_mod: args.dohr_mod.unwrap_or(config.prayer.dohr_mod),
                 asr_mod: args.asr_mod.unwrap_or(config.prayer.asr_mod),
                 maghrib_mod: args.maghrib_mod.unwrap_or(config.prayer.maghrib_mod),
@@ -144,30 +147,26 @@ impl Config {
         self.location.lon
     }
 
-    pub fn fajr(&self) -> f64 {
-        self.prayer.method.fajr_angle() * 60.
+    pub fn fajr_angle(&self) -> f64 {
+        self.prayer.method.fajr_angle()
     }
-    pub fn isha(&self) -> f64 {
+    pub fn isha_angle(&self) -> f64 {
         self.prayer.method.isha_angle()
     }
     pub fn shadow_multiplier(&self) -> u8 {
         self.prayer.madhab.shadow_multiplier()
     }
 
-    pub fn fajr_offset(&self) -> f64 {
-        self.prayer.fajr_mod as f64 / 60.
-    }
-    pub fn dhuhr_offset(&self) -> f64 {
-        self.prayer.dohr_mod as f64 / 60.
-    }
-    pub fn asr_offset(&self) -> f64 {
-        self.prayer.asr_mod as f64 / 60.
-    }
-    pub fn maghrib_offset(&self) -> f64 {
-        self.prayer.maghrib_mod as f64 / 60.
-    }
-    pub fn isha_offset(&self) -> f64 {
-        self.prayer.isha_mod as f64 / 60.
+    pub fn offset(&self, event: Event) -> f64 {
+        let minutes_mod = match event {
+            Event::Fajr => self.prayer.fajr_mod,
+            Event::Shourouk => self.prayer.shourouk_mod,
+            Event::Dhuhr => self.prayer.dohr_mod,
+            Event::Asr => self.prayer.asr_mod,
+            Event::Maghrib => self.prayer.maghrib_mod,
+            Event::Isha => self.prayer.isha_mod,
+        };
+        minutes_mod as f64 / 60.
     }
 
     pub fn notify_before(&self) -> bool {

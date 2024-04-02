@@ -78,6 +78,9 @@ pub struct Arguments {
     /// Minutes to add or remove to the Fajr time
     #[arg(long)]
     pub fajr_mod: Option<i8>,
+    /// Minutes to add or remove to the Sunrise time
+    #[arg(long)]
+    pub shourouk_mod: Option<i8>,
     /// Minutes to add or remove to the Dohr time
     #[arg(long)]
     pub dohr_mod: Option<i8>,

@@ -49,7 +49,9 @@ fn to_julian_day(date: NaiveDate) -> f64 {
 }
 
 struct DayValues {
+    // Declination of the Sun
     dos: f64,
+    // Equation of time
     eot: f64,
 }
 impl DayValues {

@@ -25,11 +25,12 @@ pub fn next(config: &Config) -> Prayer {
     get_prayer(Event::Isha, current_date, config).next(config)
 }
 // List all prayers of the day
-pub fn list_prayers(config: &Config) -> [Prayer; 5] {
+pub fn list_prayers(config: &Config) -> [Prayer; 6] {
     let date = Local::now().date_naive();
 
     [
         get_prayer(Event::Fajr, date, config),
+        get_prayer(Event::Shourouk, date, config),
         get_prayer(Event::Dhuhr, date, config),
         get_prayer(Event::Asr, date, config),
         get_prayer(Event::Maghrib, date, config),

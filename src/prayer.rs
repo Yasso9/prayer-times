@@ -14,27 +14,21 @@ pub fn get_prayer(enum_prayer: Event, date: NaiveDate, config: &Config) -> Praye
     }
     fn to_naive_date_time(date: NaiveDate, time: f64) -> NaiveDateTime {
         let naive_time = NaiveTime::from_num_seconds_from_midnight_opt((time * 3600.) as u32, 0);
+        // TODO: do not have an expect here
         NaiveDateTime::new(date, naive_time.expect("Error in prayer calculation"))
     }
 
     let dhuhr = dhuhr(date, config);
 
     let time = match enum_prayer {
-        Event::Fajr => {
-            dhuhr - solar_time_adjustment(date, config.lat(), config.fajr()) + config.fajr_offset()
-        }
-        Event::Dhuhr => dhuhr + config.dhuhr_offset(),
-        Event::Asr => {
-            dhuhr + asr(date, config.lat(), config.shadow_multiplier()) + config.asr_offset()
-        }
-        Event::Maghrib => {
-            let sunset = dhuhr + solar_time_adjustment(date, config.lat(), 0.833);
-            sunset + config.maghrib_offset()
-        }
-        Event::Isha => {
-            dhuhr + solar_time_adjustment(date, config.lat(), config.isha()) + config.isha_offset()
-        }
-    };
+        Event::Fajr => dhuhr - solar_time_adjustment(date, config.lat(), config.fajr_angle()),
+        // Event::Fajr => dhuhr - solar_time_adjustment(date, config.lat(), 18.),
+        Event::Shourouk => dhuhr - solar_time_adjustment(date, config.lat(), -0.833),
+        Event::Dhuhr => dhuhr,
+        Event::Asr => dhuhr + asr(date, config.lat(), config.shadow_multiplier()),
+        Event::Maghrib => dhuhr + solar_time_adjustment(date, config.lat(), 0.833),
+        Event::Isha => dhuhr + solar_time_adjustment(date, config.lat(), config.isha_angle()),
+    } + config.offset(enum_prayer);
 
     Prayer {
         event: enum_prayer,
