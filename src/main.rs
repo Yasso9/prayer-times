@@ -10,6 +10,8 @@ mod notification_urgency;
 mod prayer;
 mod prayers;
 
+// use std::default;
+
 use self::{
     arguments::generation::generate,
     arguments::Arguments,
@@ -59,21 +61,26 @@ fn background_process(config: &Config) {
 
 fn main() {
     let args = Arguments::parse();
-    let config = Config::new(&args);
 
-    match args.command.unwrap_or_default() {
+    let default = Commands::default();
+    let command = args.command.as_ref().unwrap_or(&default);
+    match command {
         Commands::Deamon(_deamon) => {
+            let config = Config::new(&args);
             background_process(&config);
         }
         Commands::Current => {
+            let config = Config::new(&args);
             let prayer = prayers::current(&config);
             println!("{}", prayer.text_time());
         }
         Commands::Next => {
+            let config = Config::new(&args);
             let prayer = prayers::next(&config);
             println!("{}", prayer.text_duration());
         }
         Commands::ListPrayers => {
+            let config = Config::new(&args);
             println!("Prayer times:");
             for prayer in prayers::list_prayers(&config) {
                 println!("{}", prayer.text_time());
@@ -88,6 +95,7 @@ fn main() {
             Madhab::list_all();
         }
         Commands::DryRun => {
+            let config = Config::new(&args);
             let next_prayer = prayers::next(&config);
             notify_prayer(&next_prayer, &config);
         }
