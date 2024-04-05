@@ -13,25 +13,24 @@ use notify_rust::Urgency;
 use serde::Deserialize;
 use serde::Serialize;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 struct PrayerConfig {
     method: Method,
     madhab: Madhab,
     fajr_mod: i8,
-    shourouk_mod: i8,
     dohr_mod: i8,
     asr_mod: i8,
     maghrib_mod: i8,
     isha_mod: i8,
 }
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 struct NotificationConfig {
     notify_before: bool,
     urgency: NotifUrgency,
     icon: path::PathBuf,
     interval: u64,
 }
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Config {
     location: Location,
     prayer: PrayerConfig,
@@ -57,7 +56,6 @@ impl Default for Config {
                 method: Method::default(),
                 madhab: Madhab::default(),
                 fajr_mod: 0,
-                shourouk_mod: 0,
                 dohr_mod: 0,
                 asr_mod: 0,
                 maghrib_mod: 0,
@@ -123,7 +121,6 @@ impl Config {
                 method: args.method.clone().unwrap_or(config.prayer.method),
                 madhab: args.madhab.clone().unwrap_or(config.prayer.madhab),
                 fajr_mod: args.fajr_mod.unwrap_or(config.prayer.fajr_mod),
-                shourouk_mod: args.shourouk_mod.unwrap_or(config.prayer.shourouk_mod),
                 dohr_mod: args.dohr_mod.unwrap_or(config.prayer.dohr_mod),
                 asr_mod: args.asr_mod.unwrap_or(config.prayer.asr_mod),
                 maghrib_mod: args.maghrib_mod.unwrap_or(config.prayer.maghrib_mod),
@@ -160,11 +157,14 @@ impl Config {
     pub fn offset(&self, event: Event) -> f64 {
         let minutes_mod = match event {
             Event::Fajr => self.prayer.fajr_mod,
-            Event::Shourouk => self.prayer.shourouk_mod,
+            Event::Sunrise => 0,
             Event::Dhuhr => self.prayer.dohr_mod,
             Event::Asr => self.prayer.asr_mod,
+            Event::Sunset => 0,
             Event::Maghrib => self.prayer.maghrib_mod,
             Event::Isha => self.prayer.isha_mod,
+            Event::Midnight => 0,
+            Event::Qiyam => 0,
         };
         minutes_mod as f64 / 60.
     }

@@ -3,41 +3,48 @@ use strum_macros::Display;
 #[derive(Clone, Copy, Display, PartialEq)]
 pub enum Event {
     Fajr,
-    Shourouk,
+    Sunrise,
     Dhuhr,
     Asr,
     Maghrib,
     Isha,
+    Sunset,
+    Midnight,
+    Qiyam,
 }
 impl Event {
-    pub fn list() -> [Event; 6] {
+    pub fn list() -> [Event; 9] {
+        use Event::*;
         [
-            Event::Fajr,
-            Event::Shourouk,
-            Event::Dhuhr,
-            Event::Asr,
-            Event::Maghrib,
-            Event::Isha,
+            Fajr, Sunrise, Dhuhr, Asr, Sunset, Maghrib, Isha, Midnight, Qiyam,
         ]
     }
-    pub fn previous(&self) -> Event {
+    pub fn previous(&self) -> Self {
+        use Event::*;
         match self {
-            Event::Fajr => Event::Isha,
-            Event::Shourouk => Event::Fajr,
-            Event::Dhuhr => Event::Shourouk,
-            Event::Asr => Event::Dhuhr,
-            Event::Maghrib => Event::Asr,
-            Event::Isha => Event::Maghrib,
+            Fajr => Isha,
+            Sunrise => Fajr,
+            Dhuhr => Sunrise,
+            Asr => Dhuhr,
+            Sunset => Asr,
+            Maghrib => Asr,
+            Isha => Maghrib,
+            Midnight => Isha,
+            Qiyam => Isha,
         }
     }
     pub fn next(&self) -> Event {
+        use Event::*;
         match self {
-            Event::Fajr => Event::Shourouk,
-            Event::Shourouk => Event::Dhuhr,
-            Event::Dhuhr => Event::Asr,
-            Event::Asr => Event::Maghrib,
-            Event::Maghrib => Event::Isha,
-            Event::Isha => Event::Fajr,
+            Fajr => Sunrise,
+            Sunrise => Dhuhr,
+            Dhuhr => Asr,
+            Asr => Maghrib,
+            Sunset => Isha,
+            Maghrib => Isha,
+            Isha => Midnight,
+            Midnight => Fajr,
+            Qiyam => Fajr,
         }
     }
 }

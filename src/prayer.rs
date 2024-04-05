@@ -1,80 +1,75 @@
-use crate::calculations::{asr, equation_of_time, solar_time_adjustment};
+use crate::calculations::AstronomicalMeasures;
 use crate::event::Event;
 use crate::Config;
 use chrono::{Days, Duration, Local, NaiveDate, NaiveDateTime, NaiveTime};
 
-pub fn get_prayer(enum_prayer: Event, date: NaiveDate, config: &Config) -> Prayer {
-    // Time of dhuhr. Used to calculate all other prayers
-    fn dhuhr(date: NaiveDate, config: &Config) -> f64 {
-        let timezone = Local::now().offset().local_minus_utc() / 3600;
-        let a = 12 + timezone;
-        let b = config.lon() / 15.;
-        let c = equation_of_time(date);
-        a as f64 - b - c
-    }
-    fn to_naive_date_time(date: NaiveDate, time: f64) -> NaiveDateTime {
-        let naive_time = NaiveTime::from_num_seconds_from_midnight_opt((time * 3600.) as u32, 0);
-        // TODO: do not have an expect here
-        NaiveDateTime::new(date, naive_time.expect("Error in prayer calculation"))
-    }
-
-    let dhuhr = dhuhr(date, config);
-
-    let time = match enum_prayer {
-        Event::Fajr => dhuhr - solar_time_adjustment(date, config.lat(), config.fajr_angle()),
-        // Event::Fajr => dhuhr - solar_time_adjustment(date, config.lat(), 18.),
-        Event::Shourouk => dhuhr - solar_time_adjustment(date, config.lat(), -0.833),
-        Event::Dhuhr => dhuhr,
-        Event::Asr => dhuhr + asr(date, config.lat(), config.shadow_multiplier()),
-        Event::Maghrib => dhuhr + solar_time_adjustment(date, config.lat(), 0.833),
-        Event::Isha => dhuhr + solar_time_adjustment(date, config.lat(), config.isha_angle()),
-    } + config.offset(enum_prayer);
-
-    Prayer {
-        event: enum_prayer,
-        date: to_naive_date_time(date, time),
-    }
-}
-
-#[derive(PartialEq)]
+// #[derive(PartialEq)]
 pub struct Prayer {
     event: Event,
     date: NaiveDateTime,
+    measures: AstronomicalMeasures,
+    config: Config,
+}
+impl PartialEq for Prayer {
+    fn eq(&self, other: &Self) -> bool {
+        self.event() == other.event() && self.date_time() == other.date_time()
+    }
 }
 impl Prayer {
+    fn new_from_measures(event: Event, measures: AstronomicalMeasures, config: &Config) -> Prayer {
+        Self {
+            event,
+            date: measures.date_time(event),
+            measures,
+            config: config.clone(),
+        }
+    }
+    pub fn new(event: Event, date: NaiveDate, config: &Config) -> Prayer {
+        let measures = AstronomicalMeasures::new(date, config);
+        Self::new_from_measures(event, measures, config)
+    }
+
+    fn new_from_date(&self, event: Event) -> Prayer {
+        Self::new_from_measures(event, self.measures.clone(), &self.config)
+    }
+
     pub fn event(&self) -> Event {
         self.event
     }
     pub fn date_time(&self) -> NaiveDateTime {
         self.date
     }
+    pub fn date(&self) -> NaiveDate {
+        self.date.date()
+    }
+    pub fn time(&self) -> NaiveTime {
+        self.date.time()
+    }
 
-    pub fn previous(&self, config: &Config) -> Prayer {
-        let previous_prayer = get_prayer(self.event.previous(), self.date.date(), config);
-        if previous_prayer.date_time().time() <= self.date_time().time() {
+    pub fn previous(&self) -> Prayer {
+        let previous_prayer = self.new_from_date(self.event.previous());
+        if previous_prayer.time() <= self.time() {
             return previous_prayer;
         }
 
         let previous_date = self
-            .date_time()
             .date()
             .checked_sub_days(Days::new(1))
-            .unwrap();
-        get_prayer(self.event.previous(), previous_date, config)
+            .expect("Overflow when subtracting days");
+        Self::new(self.event.previous(), previous_date, &self.config)
     }
 
-    pub fn next(&self, config: &Config) -> Prayer {
-        let next_prayer = get_prayer(self.event.next(), self.date.date(), config);
+    pub fn next(&self) -> Prayer {
+        let next_prayer = self.new_from_date(self.event.next());
         if next_prayer.date_time().time() >= self.date_time().time() {
             return next_prayer;
         }
 
         let next_date = self
-            .date_time()
             .date()
             .checked_add_days(Days::new(1))
-            .unwrap();
-        get_prayer(self.event.next(), next_date, config)
+            .expect("Overflow when adding days");
+        Self::new(self.event.next(), next_date, &self.config)
     }
 
     // Returns the time remaining for the next prayer to happen
@@ -97,14 +92,21 @@ impl Prayer {
 
     pub fn text_duration(&self) -> String {
         let time_remaining = self.time_remaining();
+        let in_or_since = if self.time_has_passed() {
+            "since"
+        } else {
+            "in"
+        };
+
         format!(
-            "Adhan {} in {:02}:{:02}",
+            "{} {in_or_since} {:02}H{:02}",
             self.event(),
             time_remaining.num_hours(),
             time_remaining.num_minutes() % 60
         )
     }
     pub fn text_time(&self) -> String {
-        format!("Adhan {} at {}", self.event(), self.date_time().time())
+        format!("{} at {}", self.event(), self.time())
+        // format!("{} at {} the {}", self.event(), self.time(), self.date())
     }
 }
