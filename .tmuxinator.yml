@@ -1,0 +1,10 @@
+# ./.tmuxinator.yml
+
+name: prayer-times
+root: ~/Development/prayer-time
+
+windows:
+   - editor: nvim
+   - shell: clear
+   - git: lazygit
+
