@@ -1,6 +1,7 @@
 mod arguments;
 mod calculations;
 mod config;
+mod daemon;
 mod event;
 mod location;
 mod madhab;
@@ -10,55 +11,14 @@ mod notification_urgency;
 mod prayer;
 mod prayers;
 
-// use std::default;
-
 use self::{
-    arguments::generation::generate,
-    arguments::Arguments,
-    arguments::Commands,
-    // arguments::PrayerCommands,
-    config::Config,
-    madhab::Madhab,
-    method::Method,
-    notification::{notify_before_prayer, notify_prayer},
+    arguments::generation::generate, arguments::Arguments, arguments::Commands, config::Config,
+    madhab::Madhab, method::Method, notification::notify_prayer,
 };
 
 // Use argument::parse() inside the argument module so we don't include this
 use clap::Parser;
-
-fn background_process(config: &Config) {
-    let mut next_prayer = prayers::next(config);
-    let mut is_notified_before = false;
-
-    println!("Starting Prayer Time Background Process");
-    println!("Waiting for next prayer time...");
-    loop {
-        println!("{}", next_prayer.text_duration());
-        println!("{}", next_prayer.text_time());
-
-        if next_prayer.time_has_passed() {
-            println!("Prayer time has passed");
-            // Notification only if it's the current prayer.
-            // If it's not the current prayer, it means that the system have been suspended
-            // so we are currently in an other prayer
-            if next_prayer == prayers::current(config) {
-                notify_prayer(&next_prayer, config);
-            }
-
-            // Update next prayer
-            next_prayer = prayers::next(config);
-            is_notified_before = false;
-        } else if config.notify_before()
-            && !is_notified_before
-            && next_prayer.time_remaining() < chrono::Duration::minutes(11)
-        {
-            notify_before_prayer(&next_prayer, next_prayer.time_remaining(), config);
-            is_notified_before = true;
-        }
-
-        std::thread::sleep(std::time::Duration::from_secs(config.interval()));
-    }
-}
+use daemon::run_daemon;
 
 fn main() {
     let args = Arguments::parse();
@@ -68,7 +28,7 @@ fn main() {
     match command {
         Commands::Deamon(_deamon) => {
             let config = Config::new(&args);
-            background_process(&config);
+            run_daemon(&config);
         }
         // Commands::Previous(prayer_command) => {
         //     let config = Config::new(&args);

@@ -8,10 +8,10 @@ use crate::madhab::Madhab;
 use crate::method::Method;
 use crate::notification_urgency::NotifUrgency;
 use crate::Arguments;
-
 use notify_rust::Urgency;
 use serde::Deserialize;
 use serde::Serialize;
+use std::error::Error;
 
 #[derive(Serialize, Deserialize, Clone)]
 struct PrayerConfig {
@@ -32,7 +32,7 @@ struct NotificationConfig {
 }
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Config {
-    location: Location,
+    location: Option<Location>,
     prayer: PrayerConfig,
     notification: NotificationConfig,
 }
@@ -40,8 +40,10 @@ pub struct Config {
 // Get the icon of the notification that should be sent
 fn default_icon() -> path::PathBuf {
     let assets_path = if cfg!(debug_assertions) {
+        println!("Running in debug mode");
         path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("assets")
     } else {
+        println!("Running in release mode");
         path::PathBuf::from("/usr/share/icons")
     };
 
@@ -51,7 +53,7 @@ fn default_icon() -> path::PathBuf {
 impl Default for Config {
     fn default() -> Self {
         Self {
-            location: Location { lat: 0., lon: 0. },
+            location: None,
             prayer: PrayerConfig {
                 method: Method::default(),
                 madhab: Madhab::default(),
@@ -83,7 +85,12 @@ impl Config {
 
         // TODO: get prayer-times from
         let (program, config) = config_options();
-        let config: Config = confy::load(program, config).unwrap_or_default();
+        let config_res = confy::load::<Config>(program, config);
+        if let Err(error) = &config_res {
+            println!("Error reading config file : {}", error);
+            println!("Caused by: {}", error.source().unwrap());
+        }
+        let config: Config = config_res.unwrap_or_default();
 
         let mut is_deamon = false;
         let mut interval = config.notification.interval;
@@ -104,19 +111,19 @@ impl Config {
                 lat: latitude,
                 lon: longitude,
             };
-        } else if config.location.lat != 0. && config.location.lon != 0. {
-            location = config.location;
+        } else if let Some(cfg_location) = config.location {
+            location = cfg_location;
         } else if let Some(auto_location) = current_location(is_deamon) {
             location = auto_location;
         } else {
             println!("No location provided in arguments or config file and impossible to get it automatically");
             println!("Run the program using the latitude and longitude arguments or set them in the config file");
-            println!("Example : {} --latitude <LAT> --longitude <LON>", program);
+            println!("Example : {program} --latitude <LAT> --longitude <LON>");
             std::process::exit(1);
         }
 
         Self {
-            location,
+            location: Some(location),
             prayer: PrayerConfig {
                 method: args.method.clone().unwrap_or(config.prayer.method),
                 madhab: args.madhab.clone().unwrap_or(config.prayer.madhab),
@@ -138,10 +145,16 @@ impl Config {
     }
 
     pub fn lat(&self) -> f64 {
-        self.location.lat
+        if let Some(location) = &self.location {
+            return location.lat;
+        }
+        0.
     }
     pub fn lon(&self) -> f64 {
-        self.location.lon
+        if let Some(location) = &self.location {
+            return location.lon;
+        }
+        0.
     }
 
     pub fn fajr_angle(&self) -> f64 {

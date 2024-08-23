@@ -1,7 +1,7 @@
 # ./.tmuxinator.yml
 
 name: prayer-times
-root: ~/Development/prayer-time
+root: ~/Development/prayer-times
 
 windows:
    - editor: nvim
