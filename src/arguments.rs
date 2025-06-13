@@ -5,48 +5,10 @@ use std::path::PathBuf;
 use crate::madhab::Madhab;
 use crate::method::Method;
 use crate::notification_urgency::NotifUrgency;
-// use clap::builder::styling::AnsiColor;
 use clap::Args;
 use clap::Parser;
 use clap::Subcommand;
 
-// pub fn get_styles() -> clap::builder::Styles {
-//     clap::builder::Styles::styled()
-//         .usage(
-//             anstyle::Style::new()
-//                 .bold()
-//                 .underline()
-//                 .fg_color(Some(anstyle::Color::Ansi(anstyle::AnsiColor::Yellow))),
-//         )
-//         .header(
-//             anstyle::Style::new()
-//                 .bold()
-//                 .underline()
-//                 .fg_color(Some(anstyle::Color::Ansi(anstyle::AnsiColor::Yellow))),
-//         )
-//         .literal(
-//             anstyle::Style::new().fg_color(Some(anstyle::Color::Ansi(anstyle::AnsiColor::Green))),
-//         )
-//         .invalid(
-//             anstyle::Style::new()
-//                 .bold()
-//                 .fg_color(Some(anstyle::Color::Ansi(anstyle::AnsiColor::Red))),
-//         )
-//         .error(
-//             anstyle::Style::new()
-//                 .bold()
-//                 .fg_color(Some(anstyle::Color::Ansi(anstyle::AnsiColor::Red))),
-//         )
-//         .valid(
-//             anstyle::Style::new()
-//                 .bold()
-//                 .underline()
-//                 .fg_color(Some(anstyle::Color::Ansi(anstyle::AnsiColor::Green))),
-//         )
-//         .placeholder(
-//             anstyle::Style::new().fg_color(Some(anstyle::Color::Ansi(anstyle::AnsiColor::White))),
-//         )
-// }
 /// Program to notify prayer times
 #[derive(Parser)]
 #[command(name = "prayer-times")]
@@ -132,9 +94,10 @@ pub enum Commands {
     /// Generate shell completions and man pages
     GenerateShell,
 }
-// give default implementation
+
 impl Default for Commands {
     fn default() -> Self {
+        // By default, start the deamon
         Self::Deamon(DeamonArgs { interval: None })
     }
 }

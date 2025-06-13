@@ -16,7 +16,7 @@ use self::{
     madhab::Madhab, method::Method, notification::notify_prayer,
 };
 
-// Use argument::parse() inside the argument module so we don't include this
+// TODO Use argument::parse() inside the argument module so we don't include this
 use clap::Parser;
 use daemon::run_daemon;
 

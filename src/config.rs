@@ -37,19 +37,6 @@ pub struct Config {
     notification: NotificationConfig,
 }
 
-// Get the icon of the notification that should be sent
-fn default_icon() -> path::PathBuf {
-    let assets_path = if cfg!(debug_assertions) {
-        println!("Running in debug mode");
-        path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("assets")
-    } else {
-        println!("Running in release mode");
-        path::PathBuf::from("/usr/share/icons")
-    };
-
-    assets_path.join("mosque-svgrepo-com.png")
-}
-
 impl Default for Config {
     fn default() -> Self {
         Self {
@@ -73,11 +60,6 @@ impl Default for Config {
     }
 }
 
-pub fn config_options<'a>() -> (&'a str, &'a str) {
-    const PROGRAM_NAME: &str = env!("CARGO_PKG_NAME");
-    (PROGRAM_NAME, "config")
-}
-
 impl Config {
     // Generate a new Config from command line arguments
     pub fn new(args: &Arguments) -> Self {
@@ -87,8 +69,8 @@ impl Config {
         let (program, config) = config_options();
         let config_res = confy::load::<Config>(program, config);
         if let Err(error) = &config_res {
-            println!("Error reading config file : {}", error);
-            println!("Caused by: {}", error.source().unwrap());
+            eprintln!("Error reading config file : {}", error);
+            eprintln!("Caused by: {}", error.source().unwrap());
         }
         let config: Config = config_res.unwrap_or_default();
 
@@ -116,9 +98,9 @@ impl Config {
         } else if let Some(auto_location) = current_location(is_deamon) {
             location = auto_location;
         } else {
-            println!("No location provided in arguments or config file and impossible to get it automatically");
-            println!("Run the program using the latitude and longitude arguments or set them in the config file");
-            println!("Example : {program} --latitude <LAT> --longitude <LON>");
+            eprintln!("No location provided in arguments or config file and impossible to get it automatically");
+            eprintln!("Run the program using the latitude and longitude arguments or set them in the config file");
+            eprintln!("Example : {program} --latitude <LAT> --longitude <LON>");
             std::process::exit(1);
         }
 
@@ -195,4 +177,20 @@ impl Config {
     pub fn interval(&self) -> u64 {
         self.notification.interval
     }
+}
+
+// Get the icon of the notification that should be sent
+fn default_icon() -> path::PathBuf {
+    let assets_path = if cfg!(debug_assertions) {
+        path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("assets")
+    } else {
+        path::PathBuf::from("/usr/share/icons")
+    };
+
+    assets_path.join("mosque-svgrepo-com.png")
+}
+
+pub fn config_options<'a>() -> (&'a str, &'a str) {
+    const PROGRAM_NAME: &str = env!("CARGO_PKG_NAME");
+    (PROGRAM_NAME, "config")
 }
