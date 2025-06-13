@@ -11,16 +11,16 @@ license = "MIT"
 exclude = ["/PKGBUILD"]
 
 [dependencies]
-chrono = "0.4.31"
-clap = { version = "4.4.14", features = ["derive"] }
-clap_complete = "4.5.1"
+chrono = "0.4.41"
+clap = { version = "4.5.40", features = ["derive"] }
+clap_complete = "4.5.54"
 confy = "0.6.1"
 geolocation = "0.2.1"
 get_if_addrs = "0.5.3"
-notify-rust = "4.10.0"
+notify-rust = "4.11.7"
 num-derive = "0.4.2"
-num-traits = "0.2.18"
-serde = "1.0.196"
+num-traits = "0.2.19"
+serde = "1.0.219"
 strum = "0.25.0"
 strum_macros = "0.25.3"
-toml = "0.8.10"
+toml = "0.8.23"

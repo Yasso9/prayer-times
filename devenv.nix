@@ -12,6 +12,8 @@
     nixfmt-classic
     statix
     deadnix
+
+    cargo-edit
   ];
 
   scripts = { run-dev.exec = "cargo run -- $@"; };
