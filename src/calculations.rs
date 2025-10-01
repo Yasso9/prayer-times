@@ -105,7 +105,7 @@ impl AstronomicalMeasures {
         };
         let asr = {
             let t = config.shadow_multiplier() as f64;
-            let i = math::darccot(t + math::dtan(config.lat() - dos));
+            let i = math::darccot(t + math::dtan((config.lat() - dos).abs()));
             let a = math::dsin(i) - math::dsin(config.lat()) * math::dsin(dos);
             let b = math::dcos(config.lat()) * math::dcos(dos);
             1. / 15. * math::darccos(a / b)
@@ -124,7 +124,7 @@ impl AstronomicalMeasures {
             date,
             fajr: dhuhr - sta(config.fajr_angle()) + config.offset(Event::Fajr),
             sunrise,
-            dhuhr: dhuhr + config.offset(Event::Fajr),
+            dhuhr: dhuhr + config.offset(Event::Dhuhr),
             asr: dhuhr + asr + config.offset(Event::Asr),
             maghrib: sunset + config.offset(Event::Maghrib),
             sunset: dhuhr + sta(0.833),
