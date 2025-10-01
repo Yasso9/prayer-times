@@ -69,12 +69,6 @@ pub struct Arguments {
 pub enum Commands {
     /// Start the process that will send notifications on prayers time [default]
     Deamon(DeamonArgs),
-    // /// Get the previous prayer
-    // Previous(PrayerArgs),
-    // /// Get the current prayer
-    // Current(PrayerArgs),
-    // /// Get the next prayer
-    // Next(PrayerArgs),
     /// Get the previous prayer
     Previous,
     /// Get the current prayer
@@ -108,25 +102,3 @@ pub struct DeamonArgs {
     #[arg(short, long)]
     pub interval: Option<u64>,
 }
-
-// #[derive(Args, Clone)]
-// pub struct PrayerArgs {
-//     #[command(subcommand)]
-//     command: Option<PrayerCommands>,
-// }
-// impl PrayerArgs {
-//     pub fn get_command(&self) -> PrayerCommands {
-//         self.command.clone().unwrap_or_default()
-//     }
-// }
-//
-// #[derive(Subcommand, Default, Clone)]
-// pub enum PrayerCommands {
-//     /// Get the current prayer
-//     #[default]
-//     Prayer,
-//     /// Get the previous prayer
-//     Previous,
-//     /// Get the next prayer
-//     Next,
-// }

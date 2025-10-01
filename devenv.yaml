@@ -1,3 +1,0 @@
-inputs:
-  nixpkgs:
-    url: github:NixOs/nixpkgs/nixos-unstable
