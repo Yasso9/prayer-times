@@ -1,0 +1,7 @@
+{
+    "recommendations": [
+        "tamasfe.even-better-toml",
+        "jnoortheen.nix-ide",
+        "rust-lang.rust-analyzer"
+    ]
+}

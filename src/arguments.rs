@@ -5,48 +5,10 @@ use std::path::PathBuf;
 use crate::madhab::Madhab;
 use crate::method::Method;
 use crate::notification_urgency::NotifUrgency;
-// use clap::builder::styling::AnsiColor;
 use clap::Args;
 use clap::Parser;
 use clap::Subcommand;
 
-// pub fn get_styles() -> clap::builder::Styles {
-//     clap::builder::Styles::styled()
-//         .usage(
-//             anstyle::Style::new()
-//                 .bold()
-//                 .underline()
-//                 .fg_color(Some(anstyle::Color::Ansi(anstyle::AnsiColor::Yellow))),
-//         )
-//         .header(
-//             anstyle::Style::new()
-//                 .bold()
-//                 .underline()
-//                 .fg_color(Some(anstyle::Color::Ansi(anstyle::AnsiColor::Yellow))),
-//         )
-//         .literal(
-//             anstyle::Style::new().fg_color(Some(anstyle::Color::Ansi(anstyle::AnsiColor::Green))),
-//         )
-//         .invalid(
-//             anstyle::Style::new()
-//                 .bold()
-//                 .fg_color(Some(anstyle::Color::Ansi(anstyle::AnsiColor::Red))),
-//         )
-//         .error(
-//             anstyle::Style::new()
-//                 .bold()
-//                 .fg_color(Some(anstyle::Color::Ansi(anstyle::AnsiColor::Red))),
-//         )
-//         .valid(
-//             anstyle::Style::new()
-//                 .bold()
-//                 .underline()
-//                 .fg_color(Some(anstyle::Color::Ansi(anstyle::AnsiColor::Green))),
-//         )
-//         .placeholder(
-//             anstyle::Style::new().fg_color(Some(anstyle::Color::Ansi(anstyle::AnsiColor::White))),
-//         )
-// }
 /// Program to notify prayer times
 #[derive(Parser)]
 #[command(name = "prayer-times")]
@@ -107,12 +69,6 @@ pub struct Arguments {
 pub enum Commands {
     /// Start the process that will send notifications on prayers time [default]
     Deamon(DeamonArgs),
-    // /// Get the previous prayer
-    // Previous(PrayerArgs),
-    // /// Get the current prayer
-    // Current(PrayerArgs),
-    // /// Get the next prayer
-    // Next(PrayerArgs),
     /// Get the previous prayer
     Previous,
     /// Get the current prayer
@@ -132,9 +88,10 @@ pub enum Commands {
     /// Generate shell completions and man pages
     GenerateShell,
 }
-// give default implementation
+
 impl Default for Commands {
     fn default() -> Self {
+        // By default, start the deamon
         Self::Deamon(DeamonArgs { interval: None })
     }
 }
@@ -145,25 +102,3 @@ pub struct DeamonArgs {
     #[arg(short, long)]
     pub interval: Option<u64>,
 }
-
-// #[derive(Args, Clone)]
-// pub struct PrayerArgs {
-//     #[command(subcommand)]
-//     command: Option<PrayerCommands>,
-// }
-// impl PrayerArgs {
-//     pub fn get_command(&self) -> PrayerCommands {
-//         self.command.clone().unwrap_or_default()
-//     }
-// }
-//
-// #[derive(Subcommand, Default, Clone)]
-// pub enum PrayerCommands {
-//     /// Get the current prayer
-//     #[default]
-//     Prayer,
-//     /// Get the previous prayer
-//     Previous,
-//     /// Get the next prayer
-//     Next,
-// }
