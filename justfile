@@ -1,0 +1,10 @@
+prayers-mecca:
+    cargo run -- --latitude 21.3891 --longitude 39.8579 list-prayers
+prayers-cairo:
+    cargo run -- --latitude 30.0444 --longitude 31.2357 --method Egyptian list-prayers
+prayers-istanbul:
+    cargo run -- --latitude 41.0082 --longitude 28.9784 --method Turkish list-prayers
+prayers-medina:
+    cargo run -- --latitude 24.4681 --longitude 39.6142 list-prayers
+prayers-paris:
+    cargo run -- --latitude 48.8575 --longitude 2.3514 --method FranceUOIF list-prayers

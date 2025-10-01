@@ -84,7 +84,7 @@ urgency = "Critical"
 interval = 20
 ```
 
-If you specify cli arguments, it will always take precedence on what you have on your config. If you don't specify any latitude and longitude it will be infered from your IP address. Location from an IP address is not always totally accurate so I advise you greatly to specify your own latitude and longitude if you want to have the most accurate prayer time.
+If you specify cli arguments, it will always take precedence on what you have on your config. If you don't specify any latitude and longitude it will be infered from your IP address. Location from an IP address is not accurate so I advise you greatly to specify your own latitude and longitude if you want to have the most accurate prayer time.
 
 ## Examples
 
