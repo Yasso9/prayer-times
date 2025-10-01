@@ -1,30 +1,7 @@
 use crate::{config::Config, event::Event};
-use chrono::{Datelike, Days, Local, NaiveDate, NaiveDateTime, NaiveTime};
+use chrono::{Datelike, Days, Local, NaiveDate, NaiveDateTime, NaiveTime, TimeZone};
 
-mod math {
-    pub(crate) fn dcos(degrees: f64) -> f64 {
-        degrees.to_radians().cos()
-    }
-    pub(crate) fn dsin(degrees: f64) -> f64 {
-        degrees.to_radians().sin()
-    }
-    pub(crate) fn dtan(degrees: f64) -> f64 {
-        degrees.to_radians().tan()
-    }
-
-    pub(crate) fn darcsin(x: f64) -> f64 {
-        x.asin().to_degrees()
-    }
-    pub(crate) fn darccos(x: f64) -> f64 {
-        x.acos().to_degrees()
-    }
-    pub(crate) fn darccot(x: f64) -> f64 {
-        (1. / x).atan().to_degrees()
-    }
-    pub(crate) fn darctan2(y: f64, x: f64) -> f64 {
-        y.atan2(x).to_degrees()
-    }
-}
+mod math;
 
 fn fix(a: f64, b: f64) -> f64 {
     let result = a - b * (a / b).floor();
@@ -49,14 +26,9 @@ fn to_julian_day(date: NaiveDate) -> f64 {
     (b / 4.) + (c / 12.) - (3. * e / 4.) + day - 32075.
 }
 
-// #[derive(PartialEq)]
 #[derive(Clone)]
 pub struct AstronomicalMeasures {
     date: NaiveDate,
-    // a_sta: f64,
-    // b_sta: f64,
-    // dhuhr: f64,
-    // asr: f64,
     fajr: f64,
     sunrise: f64,
     dhuhr: f64,
@@ -69,10 +41,11 @@ pub struct AstronomicalMeasures {
 }
 impl AstronomicalMeasures {
     pub fn new(date: NaiveDate, config: &Config) -> Self {
-        let (dos, eot) = {
-            let jd = to_julian_day(date);
+        // https://praytimes.org/calculation#astronomical_measures
+        let (declination_of_sun, equation_of_time) = {
+            let julian_day = to_julian_day(date);
 
-            let d = jd - 2451545.0;
+            let d = julian_day - 2451545.0;
 
             let g = fix(357.529 + 0.98560028 * d, 360.);
             let q = fix(280.459 + 0.98564736 * d, 360.);
@@ -80,39 +53,44 @@ impl AstronomicalMeasures {
             let e = 23.439 - 0.00000036 * d;
             let ra = math::darctan2(math::dcos(e) * math::dsin(l), math::dcos(l)) / 15.;
 
-            // Declination of the Sun
-            let dos = math::darcsin(math::dsin(e) * math::dsin(l));
-            // Equation of Time
-            let eot = q / 15. - fix(ra, 24.);
+            let declination_of_sun = math::darcsin(math::dsin(e) * math::dsin(l));
+            let equation_of_time = q / 15. - fix(ra, 24.);
 
-            (dos, eot)
+            (declination_of_sun, equation_of_time)
         };
 
-        let a_sta = math::dsin(config.lat()) * math::dsin(dos);
-        let b_sta = math::dcos(config.lat()) * math::dcos(dos);
-        let sta = |angle: f64| -> f64 {
-            let a = -math::dsin(angle) - a_sta;
-            let b = b_sta;
-            1. / 15. * math::darccos(a / b)
+        let solar_hour_angle = |angle: f64| -> f64 {
+            let numerator =
+                -math::dsin(angle) - math::dsin(config.lat()) * math::dsin(declination_of_sun);
+            let denominator = math::dcos(config.lat()) * math::dcos(declination_of_sun);
+            1. / 15. * math::darccos(numerator / denominator)
         };
 
+        // https://praytimes.org/calculation#dhuhr
         let dhuhr = {
-            let timezone = Local::now().offset().local_minus_utc() as f64 / 3600.;
+            let timezone = Local
+                .offset_from_local_date(&date)
+                .single()
+                .unwrap()
+                .local_minus_utc() as f64
+                / 3600.;
             let a = 12. + timezone;
             let b = config.lon() / 15.;
-            let c = eot;
+            let c = equation_of_time;
             a - b - c
         };
+        // https://praytimes.org/calculation#asr
         let asr = {
             let t = config.shadow_multiplier() as f64;
-            let i = math::darccot(t + math::dtan((config.lat() - dos).abs()));
-            let a = math::dsin(i) - math::dsin(config.lat()) * math::dsin(dos);
-            let b = math::dcos(config.lat()) * math::dcos(dos);
+            let i = math::darccot(t + math::dtan((config.lat() - declination_of_sun).abs()));
+            let a = math::dsin(i) - math::dsin(config.lat()) * math::dsin(declination_of_sun);
+            let b = math::dcos(config.lat()) * math::dcos(declination_of_sun);
             1. / 15. * math::darccos(a / b)
         };
 
-        let sunrise = dhuhr - sta(0.833);
-        let sunset = dhuhr + sta(0.833);
+        // https://praytimes.org/calculation#sunrisesunset
+        let sunrise = dhuhr - solar_hour_angle(0.833);
+        let sunset = dhuhr + solar_hour_angle(0.833);
         let full_sunrise = if sunrise < sunset {
             sunrise + 24.
         } else {
@@ -122,13 +100,13 @@ impl AstronomicalMeasures {
 
         Self {
             date,
-            fajr: dhuhr - sta(config.fajr_angle()) + config.offset(Event::Fajr),
+            fajr: dhuhr - solar_hour_angle(config.fajr_angle()) + config.offset(Event::Fajr),
             sunrise,
             dhuhr: dhuhr + config.offset(Event::Dhuhr),
             asr: dhuhr + asr + config.offset(Event::Asr),
             maghrib: sunset + config.offset(Event::Maghrib),
-            sunset: dhuhr + sta(0.833),
-            isha: dhuhr + sta(config.isha_angle()) + config.offset(Event::Isha),
+            sunset: dhuhr + solar_hour_angle(0.833),
+            isha: dhuhr + solar_hour_angle(config.isha_angle()) + config.offset(Event::Isha),
             midnight: sunset + 0.5 * diff_night,
             third_of_night: sunset + 0.75 * diff_night,
         }
