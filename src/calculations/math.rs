@@ -53,6 +53,13 @@ pub fn darctan2(y: f64, x: f64) -> f64 {
     y.atan2(x).to_degrees()
 }
 
+// pub fn deg_to_rad(degrees: f64) -> f64 {
+//     degrees * std::f64::consts::PI / 180.0
+// }
+// pub fn rad_to_deg(radians: f64) -> f64 {
+//     radians * 180.0 / std::f64::consts::PI
+// }
+
 #[cfg(test)]
 mod tests {
     use super::*;

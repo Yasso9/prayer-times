@@ -3,17 +3,26 @@ use chrono::{Datelike, Days, Local, NaiveDate, NaiveDateTime, NaiveTime, TimeZon
 
 mod math;
 
-fn fix(a: f64, b: f64) -> f64 {
-    let result = a - b * (a / b).floor();
+fn positive_mod(value: f64, modulus: f64) -> f64 {
+    let result = value - modulus * (value / modulus).floor();
     if result < 0. {
-        result + b
+        result + modulus
+    } else if result >= modulus {
+        result - modulus // Handle the other precision error case
     } else {
         result
     }
 }
 
+fn normalize_degrees(angle: f64) -> f64 {
+    positive_mod(angle, 360.)
+}
+fn normalize_hours(hour: f64) -> f64 {
+    positive_mod(hour, 24.)
+}
+
 // https://orbital-mechanics.space/reference/julian-date.html
-fn to_julian_day(date: NaiveDate) -> f64 {
+fn julian_day(date: NaiveDate) -> f64 {
     let day = date.day() as i32;
     let month = date.month() as i32;
     let year = date.year() as i32;
@@ -43,18 +52,34 @@ impl AstronomicalMeasures {
     pub fn new(date: NaiveDate, config: &Config) -> Self {
         // https://praytimes.org/calculation#astronomical_measures
         let (declination_of_sun, equation_of_time) = {
-            let julian_day = to_julian_day(date);
+            let julian_day = julian_day(date);
 
             let d = julian_day - 2451545.0;
 
-            let g = fix(357.529 + 0.98560028 * d, 360.);
-            let q = fix(280.459 + 0.98564736 * d, 360.);
-            let l = fix(q + 1.915 * math::dsin(g) + 0.020 * math::dsin(2. * g), 360.);
+            let g = normalize_degrees(357.529 + 0.98560028 * d);
+            let q = normalize_degrees(280.459 + 0.98564736 * d);
+            let l = normalize_degrees(q + 1.915 * math::dsin(g) + 0.020 * math::dsin(2. * g));
             let e = 23.439 - 0.00000036 * d;
             let ra = math::darctan2(math::dcos(e) * math::dsin(l), math::dcos(l)) / 15.;
 
             let declination_of_sun = math::darcsin(math::dsin(e) * math::dsin(l));
-            let equation_of_time = q / 15. - fix(ra, 24.);
+            let equation_of_time = q / 15. - normalize_hours(ra);
+            // println!("dec: {}, eq: {}", declination_of_sun, equation_of_time);
+
+            // // Convert day to angle (in radians)
+            // let n = date.ordinal() as f64;
+            // let d = 2.0 * std::f64::consts::PI * (n - 1.0) / 365.0;
+            // // Calculate equation of time components
+            // // These empirical coefficients account for Earth's orbital eccentricity
+            // // and axial tilt
+            // let eot_minutes = 229.18
+            //     * (0.000075 + 0.001868 * d.cos()
+            //         - 0.032077 * d.sin()
+            //         - 0.014615 * (2.0 * d).cos()
+            //         - 0.040849 * (2.0 * d).sin());
+            // // Convert minutes to hours
+            // let eot = eot_minutes / 60.0;
+            // println!("dec: {}, eq: {}", declination_of_sun, eot);
 
             (declination_of_sun, equation_of_time)
         };
@@ -74,6 +99,7 @@ impl AstronomicalMeasures {
                 .unwrap()
                 .local_minus_utc() as f64
                 / 3600.;
+            println!("timezone: {}", timezone);
             let a = 12. + timezone;
             let b = config.lon() / 15.;
             let c = equation_of_time;
@@ -83,6 +109,7 @@ impl AstronomicalMeasures {
         let asr = {
             let t = config.shadow_multiplier() as f64;
             let i = math::darccot(t + math::dtan((config.lat() - declination_of_sun).abs()));
+            // let i = math::darccot(t + math::dtan(config.lat() - declination_of_sun));
             let a = math::dsin(i) - math::dsin(config.lat()) * math::dsin(declination_of_sun);
             let b = math::dcos(config.lat()) * math::dcos(declination_of_sun);
             1. / 15. * math::darccos(a / b)
