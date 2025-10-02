@@ -14,16 +14,16 @@ fn fix(a: f64, b: f64) -> f64 {
 
 // https://orbital-mechanics.space/reference/julian-date.html
 fn to_julian_day(date: NaiveDate) -> f64 {
-    let day = date.day() as f64;
-    let month = date.month() as f64;
-    let year = date.year() as f64;
+    let day = date.day() as i32;
+    let month = date.month() as i32;
+    let year = date.year() as i32;
 
-    let a = (month - 14.) / 12.;
-    let b = 1461. * (year + 4800. + a);
-    let c = 367. * (month - 2. - (12. * a));
-    let e = (year + 4900. + a) / 100.;
+    let a = (month - 14) / 12;
+    let b = 1461 * (year + 4800 + a);
+    let c = 367 * (month - 2 - 12 * a);
+    let e = (year + 4900 + a) / 100;
 
-    (b / 4.) + (c / 12.) - (3. * e / 4.) + day - 32075.
+    (b / 4 + c / 12 - 3 * e / 4 + day - 32075) as f64
 }
 
 #[derive(Clone)]

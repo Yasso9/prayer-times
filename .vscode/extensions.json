@@ -1,7 +1,8 @@
 {
     "recommendations": [
+        "rust-lang.rust-analyzer",
         "tamasfe.even-better-toml",
         "jnoortheen.nix-ide",
-        "rust-lang.rust-analyzer"
+        "mkhl.direnv"
     ]
 }
