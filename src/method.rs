@@ -28,7 +28,7 @@ pub enum Method {
     // Algeria,
     // Indonesia,
     // Morocco,
-    // Lisboa,
+    // Lisbon,
 }
 impl Method {
     pub fn fajr_angle(&self) -> f64 {

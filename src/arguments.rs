@@ -25,6 +25,10 @@ pub struct Arguments {
     #[arg(short = 'L', long)]
     pub longitude: Option<f64>,
 
+    /// Timezone for prayer times (e.g., "America/New_York", "+05:00", "UTC") [default: system timezone]
+    #[arg(short = 't', long)]
+    pub timezone: Option<String>,
+
     /// Calculation Method to use
     #[arg(short = 'm', long)]
     pub method: Option<Method>,
@@ -40,9 +44,9 @@ pub struct Arguments {
     /// Minutes to add or remove to the Fajr time
     #[arg(long, allow_hyphen_values = true)]
     pub fajr_mod: Option<i8>,
-    /// Minutes to add or remove to the Dohr time
+    /// Minutes to add or remove to the Dhuhr time
     #[arg(long, allow_hyphen_values = true)]
-    pub dohr_mod: Option<i8>,
+    pub dhuhr_mod: Option<i8>,
     /// Minutes to add or remove to the Asr time
     #[arg(long, allow_hyphen_values = true)]
     pub asr_mod: Option<i8>,
@@ -68,7 +72,7 @@ pub struct Arguments {
 #[derive(Subcommand)]
 pub enum Commands {
     /// Start the process that will send notifications on prayers time [default]
-    Deamon(DeamonArgs),
+    Daemon(DaemonArgs),
     /// Get the previous prayer
     Previous,
     /// Get the current prayer
@@ -91,13 +95,12 @@ pub enum Commands {
 
 impl Default for Commands {
     fn default() -> Self {
-        // By default, start the deamon
-        Self::Deamon(DeamonArgs { interval: None })
+        Self::Daemon(DaemonArgs { interval: None })
     }
 }
 
 #[derive(Args)]
-pub struct DeamonArgs {
+pub struct DaemonArgs {
     /// Interval in seconds for checking new prayers
     #[arg(short, long)]
     pub interval: Option<u64>,

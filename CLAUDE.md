@@ -9,7 +9,7 @@
 **Main Entry Point** (`src/main.rs`):
 - Parses CLI arguments using `clap`
 - Dispatches to appropriate command handlers
-- Manages application lifecycle
+- Manages application life cycle
 
 **Command System** (`src/arguments.rs`):
 - Defines CLI interface with clap derive macros

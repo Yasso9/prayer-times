@@ -38,7 +38,7 @@ cargo build --release
 Usage: prayer-times [OPTIONS] [COMMAND]
 
 Commands:
-  deamon          Start the process that will send notifications on prayers time [default]
+  daemon          Start the process that will send notifications on prayers time [default]
   current         Get the current prayer
   next            Get the next prayer
   list-prayers    List all the prayers of the current day
@@ -55,7 +55,7 @@ Options:
   -m, --method <METHOD>                Calculation Method to use
   -M, --madhab <MADHAB>                Madhab to use
       --fajr-mod <FAJR_MOD>            Minutes to add or remove to the Fajr time
-      --dohr-mod <DOHR_MOD>            Minutes to add or remove to the Dohr time
+      --dhuhr-mod <DHUHR_MOD>          Minutes to add or remove to the Dhuhr time
       --asr-mod <ASR_MOD>              Minutes to add or remove to the Asr time
       --maghrib-mod <MAGHRIB_MOD>      Minutes to add or remove to the Maghrib time
       --isha-mod <ISHA_MOD>            Minutes to add or remove to the Isha time
@@ -66,14 +66,14 @@ Options:
   -V, --version                        Print version
 ```
 
-You can also configurate the program from a config file located in `$XDG_CONFIG_HOME/prayer-times/config.toml`. Here is the default config :
+You can also configure the program from a config file located in `$XDG_CONFIG_HOME/prayer-times/config.toml`. Here is the default config :
 
 ```toml
 [prayer]
 method = "MuslimWorldLeague"
 madhab = "Shafi"
 fajr_mod = 0
-dohr_mod = 0
+dhuhr_mod = 0
 asr_mod = 0
 maghrib_mod = 0
 isha_mod = 0

@@ -26,7 +26,7 @@ fn main() {
     let default = Commands::default();
     let command = args.command.as_ref().unwrap_or(&default);
     match command {
-        Commands::Deamon(_deamon) => {
+        Commands::Daemon(_daemon) => {
             let config = Config::new(&args);
             run_daemon(&config);
         }

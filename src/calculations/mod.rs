@@ -8,7 +8,7 @@ fn positive_mod(value: f64, modulus: f64) -> f64 {
     if result < 0. {
         result + modulus
     } else if result >= modulus {
-        result - modulus // Handle the other precision error case
+        result - modulus
     } else {
         result
     }
@@ -66,21 +66,6 @@ impl AstronomicalMeasures {
             let equation_of_time = q / 15. - normalize_hours(ra);
             // println!("dec: {}, eq: {}", declination_of_sun, equation_of_time);
 
-            // // Convert day to angle (in radians)
-            // let n = date.ordinal() as f64;
-            // let d = 2.0 * std::f64::consts::PI * (n - 1.0) / 365.0;
-            // // Calculate equation of time components
-            // // These empirical coefficients account for Earth's orbital eccentricity
-            // // and axial tilt
-            // let eot_minutes = 229.18
-            //     * (0.000075 + 0.001868 * d.cos()
-            //         - 0.032077 * d.sin()
-            //         - 0.014615 * (2.0 * d).cos()
-            //         - 0.040849 * (2.0 * d).sin());
-            // // Convert minutes to hours
-            // let eot = eot_minutes / 60.0;
-            // println!("dec: {}, eq: {}", declination_of_sun, eot);
-
             (declination_of_sun, equation_of_time)
         };
 
@@ -99,7 +84,7 @@ impl AstronomicalMeasures {
                 .unwrap()
                 .local_minus_utc() as f64
                 / 3600.;
-            println!("timezone: {}", timezone);
+            // println!("timezone: {}", timezone);
             let a = 12. + timezone;
             let b = config.lon() / 15.;
             let c = equation_of_time;
