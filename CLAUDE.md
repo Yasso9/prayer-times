@@ -21,6 +21,7 @@
 - `src/method.rs` - Different calculation methods (MuslimWorldLeague, Egyptian, etc.)
 - `src/madhab.rs` - Madhab-specific calculations (Shafi, Hanafi)
 - `src/prayers.rs` - Prayer time management and utilities
+- Reference: https://praytimes.org/calculation - Detailed documentation of all calculation methods
 
 **Location & Configuration**:
 - `src/location.rs` - Geolocation from IP if coordinates not provided

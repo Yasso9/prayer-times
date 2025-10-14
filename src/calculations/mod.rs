@@ -1,5 +1,6 @@
 use crate::{config::Config, event::Event};
-use chrono::{Datelike, Days, Local, NaiveDate, NaiveDateTime, NaiveTime, TimeZone};
+use chrono::{Datelike, Days, NaiveDate, NaiveDateTime, NaiveTime, TimeZone};
+use chrono_tz::OffsetComponents;
 
 mod math;
 
@@ -46,7 +47,7 @@ pub struct AstronomicalMeasures {
     maghrib: f64,
     isha: f64,
     midnight: f64,
-    third_of_night: f64,
+    // third_of_night: f64,
 }
 impl AstronomicalMeasures {
     pub fn new(date: NaiveDate, config: &Config) -> Self {
@@ -78,13 +79,13 @@ impl AstronomicalMeasures {
 
         // https://praytimes.org/calculation#dhuhr
         let dhuhr = {
-            let timezone = Local
+            let offset = config
+                .timezone()
                 .offset_from_local_date(&date)
                 .single()
-                .unwrap()
-                .local_minus_utc() as f64
-                / 3600.;
-            // println!("timezone: {}", timezone);
+                .unwrap();
+            let timezone =
+                (offset.base_utc_offset() + offset.dst_offset()).num_seconds() as f64 / 3600.;
             let a = 12. + timezone;
             let b = config.lon() / 15.;
             let c = equation_of_time;
@@ -116,11 +117,11 @@ impl AstronomicalMeasures {
             sunrise,
             dhuhr: dhuhr + config.offset(Event::Dhuhr),
             asr: dhuhr + asr + config.offset(Event::Asr),
+            sunset: sunset,
             maghrib: sunset + config.offset(Event::Maghrib),
-            sunset: dhuhr + solar_hour_angle(0.833),
             isha: dhuhr + solar_hour_angle(config.isha_angle()) + config.offset(Event::Isha),
             midnight: sunset + 0.5 * diff_night,
-            third_of_night: sunset + 0.75 * diff_night,
+            // third_of_night: sunset + 0.75 * diff_night,
         }
     }
 
@@ -128,7 +129,7 @@ impl AstronomicalMeasures {
         self.date
     }
 
-    fn get_raw_time(&self, event: Event) -> f64 {
+    fn raw_time(&self, event: Event) -> f64 {
         match event {
             Event::Fajr => self.fajr,
             Event::Sunrise => self.sunrise,
@@ -138,12 +139,11 @@ impl AstronomicalMeasures {
             Event::Maghrib => self.maghrib,
             Event::Isha => self.isha,
             Event::Midnight => self.midnight,
-            Event::Qiyam => self.third_of_night,
         }
     }
 
     pub fn date_time(&self, event: Event) -> NaiveDateTime {
-        let time = self.get_raw_time(event);
+        let time = self.raw_time(event);
 
         let naive_time =
             NaiveTime::from_num_seconds_from_midnight_opt((time.rem_euclid(24.) * 3600.) as u32, 0);

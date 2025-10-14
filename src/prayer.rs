@@ -3,7 +3,6 @@ use crate::event::Event;
 use crate::Config;
 use chrono::{Days, Duration, Local, NaiveDate, NaiveDateTime, NaiveTime};
 
-// #[derive(PartialEq)]
 pub struct Prayer {
     event: Event,
     date: NaiveDateTime,

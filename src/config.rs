@@ -174,7 +174,6 @@ impl Config {
             Event::Maghrib => self.prayer.maghrib_mod,
             Event::Isha => self.prayer.isha_mod,
             Event::Midnight => 0,
-            Event::Qiyam => 0,
         };
         minutes_mod as f64 / 60.
     }

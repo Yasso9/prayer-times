@@ -10,14 +10,11 @@ pub enum Event {
     Isha,
     Sunset,
     Midnight,
-    Qiyam,
 }
 impl Event {
-    pub fn list() -> [Event; 9] {
+    pub fn list() -> [Event; 8] {
         use Event::*;
-        [
-            Fajr, Sunrise, Dhuhr, Asr, Sunset, Maghrib, Isha, Midnight, Qiyam,
-        ]
+        [Fajr, Sunrise, Dhuhr, Asr, Sunset, Maghrib, Isha, Midnight]
     }
     pub fn previous(&self) -> Self {
         use Event::*;
@@ -30,7 +27,6 @@ impl Event {
             Maghrib => Asr,
             Isha => Maghrib,
             Midnight => Isha,
-            Qiyam => Isha,
         }
     }
     pub fn next(&self) -> Event {
@@ -44,7 +40,6 @@ impl Event {
             Maghrib => Isha,
             Isha => Midnight,
             Midnight => Fajr,
-            Qiyam => Fajr,
         }
     }
 }
