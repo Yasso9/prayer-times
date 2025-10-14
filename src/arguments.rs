@@ -79,14 +79,14 @@ pub enum Commands {
     Current,
     /// Get the next prayer
     Next,
-    /// List all the prayers of the current day
-    ListPrayers,
+    /// List all the prayers of a specific date (defaults to current day)
+    Prayers(ListPrayersArgs),
     /// List all methods available for the calculation of the prayer times
-    ListMethods,
+    Methods,
     /// List all madhab available for the calculation of the prayer times
-    ListMadhab,
+    Madhab,
     /// Show the next prayer in a notification to test if everything works
-    DryRun,
+    // DryRun,
     /// Get the path of the toml config file
     Config,
     /// Generate shell completions and man pages
@@ -104,4 +104,11 @@ pub struct DaemonArgs {
     /// Interval in seconds for checking new prayers
     #[arg(short, long)]
     pub interval: Option<u64>,
+}
+
+#[derive(Args)]
+pub struct ListPrayersArgs {
+    /// Date to list prayers for in YYYY-MM-DD format (defaults to current day)
+    #[arg(short, long)]
+    pub date: Option<String>,
 }

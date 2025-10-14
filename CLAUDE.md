@@ -13,7 +13,7 @@
 
 **Command System** (`src/arguments.rs`):
 - Defines CLI interface with clap derive macros
-- Supports subcommands: daemon, current, next, list-prayers, list-methods, etc.
+- Supports subcommands: daemon, current, next, prayers, methods, etc.
 - Handles coordinate inputs, calculation methods, and notification settings
 
 **Prayer Calculation Engine**:

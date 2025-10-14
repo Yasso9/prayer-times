@@ -13,7 +13,7 @@ mod prayers;
 
 use self::{
     arguments::generation::generate, arguments::Arguments, arguments::Commands, config::Config,
-    madhab::Madhab, method::Method, notification::notify_prayer,
+    madhab::Madhab, method::Method,
 };
 
 // TODO Use argument::parse() inside the argument module so we don't include this
@@ -45,26 +45,36 @@ fn main() {
             let prayer = prayers::next(&config);
             println!("{}", prayer.text_duration());
         }
-        Commands::ListPrayers => {
+        Commands::Prayers(list_prayers_args) => {
             let config = Config::new(&args);
-            println!("Prayer times:");
-            for prayer in prayers::list_prayers(&config) {
+
+            let prayer_list = if let Some(date_str) = &list_prayers_args.date {
+                match chrono::NaiveDate::parse_from_str(date_str, "%Y-%m-%d") {
+                    Ok(date) => prayers::list_prayers_for_date(&config, date),
+                    Err(_) => {
+                        eprintln!("Error: Invalid date format. Please use YYYY-MM-DD format.");
+                        std::process::exit(1);
+                    }
+                }
+            } else {
+                prayers::list_prayers(&config)
+            };
+
+            for prayer in prayer_list {
                 println!("{}", prayer.text_time());
             }
         }
-        Commands::ListMethods => {
-            println!("Methods:");
+        Commands::Methods => {
             Method::list_all();
         }
-        Commands::ListMadhab => {
-            println!("Madhab:");
+        Commands::Madhab => {
             Madhab::list_all();
         }
-        Commands::DryRun => {
-            let config = Config::new(&args);
-            let next_prayer = prayers::next(&config);
-            notify_prayer(&next_prayer, &config);
-        }
+        // Commands::DryRun => {
+        //     let config = Config::new(&args);
+        //     let next_prayer = prayers::next(&config);
+        //     notify_prayer(&next_prayer, &config);
+        // }
         Commands::Config => {
             let (program, config) = config::config_options();
             let result = confy::get_configuration_file_path(program, config);

@@ -41,9 +41,9 @@ Commands:
   daemon          Start the process that will send notifications on prayers time [default]
   current         Get the current prayer
   next            Get the next prayer
-  list-prayers    List all the prayers of the current day
-  list-methods    List all methods available for the calculation of the prayer times
-  list-madhab     List all madhab available for the calculation of the prayer times
+  prayers    List all the prayers of the current day
+  methods    List all methods available for the calculation of the prayer times
+  madhab     List all madhab available for the calculation of the prayer times
   dry-run         Show the next prayer in a notification to test if everything works
   config          Get the path of the toml config file
   generate-shell  Generate shell completions and man pages
@@ -93,7 +93,7 @@ If you specify cli arguments, it will always take precedence on what you have on
 Adhan Dhuhr in 01:13
 ```
 
-`prayer-times list-prayers`
+`prayer-times prayers`
 ```sh
 Prayer times:
 Adhan Fajr at 07:32:32
@@ -103,7 +103,7 @@ Adhan Maghrib at 20:23:24
 Adhan Isha at 22:08:05
 ```
 
-`prayer-times list-methods`
+`prayer-times methods`
 ```sh
 MuslimWorldLeague : [ fajr angle: 18, isha angle: 17 ]
 NorthAmerica : [ fajr angle: 15, isha angle: 15 ]
@@ -116,7 +116,7 @@ FranceUOIF : [ fajr angle: 12, isha angle: 12 ]
 FranceGMP : [ fajr angle: 18, isha angle: 18 ]
 ```
 
-`prayer-times list-madhab`
+`prayer-times madhab`
 ```sh
 Madhab:
 Shafi

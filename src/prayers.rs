@@ -117,9 +117,6 @@ mod tests {
         let date = NaiveDate::from_ymd_opt(2022, 1, 1).unwrap();
 
         let prayers = list_prayers_for_date(&config, date);
-        for prayer in list_prayers(&config) {
-            println!("{}", prayer.text_time());
-        }
 
         // curl -X GET "https://api.aladhan.com/v1/timings/01-01-2022?latitude=21.42664&longitude=39.82563&method=4&timezonestring=Asia%2FRiyadh" -H 'accept: application/json' | jq
         assert_eq!(prayers[0].time().format("%H:%M").to_string(), "05:37");
