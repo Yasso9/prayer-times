@@ -193,6 +193,7 @@ impl Config {
 
 fn parse_timezone_string(tz_str: &str) -> i64 {
     if let Ok(tz) = tz_str.parse::<chrono_tz::Tz>() {
+        // println!("Parsed timezone: {:?}", timezone_to_offset(tz));
         return timezone_to_offset(tz);
     }
 
