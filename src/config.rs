@@ -8,6 +8,9 @@ use crate::madhab::Madhab;
 use crate::method::Method;
 use crate::notification_urgency::NotifUrgency;
 use crate::Arguments;
+use chrono::Local;
+use chrono::{TimeZone, Utc};
+use chrono_tz::OffsetComponents;
 use notify_rust::Urgency;
 use serde::Deserialize;
 use serde::Serialize;
@@ -142,15 +145,10 @@ impl Config {
         0.
     }
 
-    pub fn timezone(&self) -> chrono_tz::Tz {
-        if let Some(tz_str) = &self.timezone {
-            tz_str.parse().unwrap_or_else(|_| {
-                eprintln!("Invalid timezone '{}', falling back to UTC", tz_str);
-                chrono_tz::UTC
-            })
-        } else {
-            // Fallback to UTC when no timezone specified
-            chrono_tz::UTC
+    pub fn timezone_offset(&self) -> i64 {
+        match &self.timezone {
+            Some(tz_str) => parse_timezone_string(tz_str),
+            None => system_timezone_offset(),
         }
     }
 
@@ -191,6 +189,35 @@ impl Config {
     pub fn interval(&self) -> u64 {
         self.notification.interval
     }
+}
+
+fn parse_timezone_string(tz_str: &str) -> i64 {
+    if let Ok(tz) = tz_str.parse::<chrono_tz::Tz>() {
+        println!("Using timezone: {}", timezone_to_offset(tz));
+        return timezone_to_offset(tz);
+    }
+
+    let offset = system_timezone_offset();
+    eprintln!(
+        "Invalid timezone '{}', falling back to system timezone GMT{:+}",
+        tz_str, offset
+    );
+    offset
+}
+
+fn timezone_to_offset(timezone: chrono_tz::Tz) -> i64 {
+    let now_utc = Utc::now();
+    let local_time = timezone.from_utc_datetime(&now_utc.naive_utc());
+    let offset = local_time.offset();
+    let total_offset = offset.base_utc_offset() + offset.dst_offset();
+    total_offset.num_hours()
+}
+
+fn system_timezone_offset() -> i64 {
+    let local_time = Local::now();
+    let offset = local_time.offset().local_minus_utc();
+    let offset_hours = offset / 3600;
+    offset_hours as i64
 }
 
 // Get the icon of the notification that should be sent

@@ -1,6 +1,5 @@
 use crate::{config::Config, event::Event};
-use chrono::{Datelike, Days, NaiveDate, NaiveDateTime, NaiveTime, TimeZone};
-use chrono_tz::OffsetComponents;
+use chrono::{Datelike, Days, NaiveDate, NaiveDateTime, NaiveTime};
 
 mod math;
 
@@ -79,14 +78,7 @@ impl AstronomicalMeasures {
 
         // https://praytimes.org/calculation#dhuhr
         let dhuhr = {
-            let offset = config
-                .timezone()
-                .offset_from_local_date(&date)
-                .single()
-                .unwrap();
-            let timezone =
-                (offset.base_utc_offset() + offset.dst_offset()).num_seconds() as f64 / 3600.;
-            let a = 12. + timezone;
+            let a = 12. + config.timezone_offset() as f64;
             let b = config.lon() / 15.;
             let c = equation_of_time;
             a - b - c
