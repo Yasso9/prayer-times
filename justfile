@@ -1,3 +1,5 @@
+run *args:
+    cargo run -- {{args}}
 prayers-makkah:
     cargo run -- --latitude 21.42664 --longitude 39.82563 --method MAKKAH --timezone Asia/Riyadh prayers
 prayers-cairo:
