@@ -9,11 +9,11 @@
 **Main Entry Point** (`src/main.rs`):
 - Parses CLI arguments using `clap`
 - Dispatches to appropriate command handlers
-- Manages application lifecycle
+- Manages application life cycle
 
 **Command System** (`src/arguments.rs`):
 - Defines CLI interface with clap derive macros
-- Supports subcommands: daemon, current, next, list-prayers, list-methods, etc.
+- Supports subcommands: daemon, current, next, prayers, methods, etc.
 - Handles coordinate inputs, calculation methods, and notification settings
 
 **Prayer Calculation Engine**:
@@ -21,6 +21,7 @@
 - `src/method.rs` - Different calculation methods (MuslimWorldLeague, Egyptian, etc.)
 - `src/madhab.rs` - Madhab-specific calculations (Shafi, Hanafi)
 - `src/prayers.rs` - Prayer time management and utilities
+- Reference: https://praytimes.org/calculation - Detailed documentation of all calculation methods
 
 **Location & Configuration**:
 - `src/location.rs` - Geolocation from IP if coordinates not provided

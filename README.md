@@ -38,12 +38,12 @@ cargo build --release
 Usage: prayer-times [OPTIONS] [COMMAND]
 
 Commands:
-  deamon          Start the process that will send notifications on prayers time [default]
+  daemon          Start the process that will send notifications on prayers time [default]
   current         Get the current prayer
   next            Get the next prayer
-  list-prayers    List all the prayers of the current day
-  list-methods    List all methods available for the calculation of the prayer times
-  list-madhab     List all madhab available for the calculation of the prayer times
+  prayers    List all the prayers of the current day
+  methods    List all methods available for the calculation of the prayer times
+  madhab     List all madhab available for the calculation of the prayer times
   dry-run         Show the next prayer in a notification to test if everything works
   config          Get the path of the toml config file
   generate-shell  Generate shell completions and man pages
@@ -55,7 +55,7 @@ Options:
   -m, --method <METHOD>                Calculation Method to use
   -M, --madhab <MADHAB>                Madhab to use
       --fajr-mod <FAJR_MOD>            Minutes to add or remove to the Fajr time
-      --dohr-mod <DOHR_MOD>            Minutes to add or remove to the Dohr time
+      --dhuhr-mod <DHUHR_MOD>          Minutes to add or remove to the Dhuhr time
       --asr-mod <ASR_MOD>              Minutes to add or remove to the Asr time
       --maghrib-mod <MAGHRIB_MOD>      Minutes to add or remove to the Maghrib time
       --isha-mod <ISHA_MOD>            Minutes to add or remove to the Isha time
@@ -66,14 +66,14 @@ Options:
   -V, --version                        Print version
 ```
 
-You can also configurate the program from a config file located in `$XDG_CONFIG_HOME/prayer-times/config.toml`. Here is the default config :
+You can also configure the program from a config file located in `$XDG_CONFIG_HOME/prayer-times/config.toml`. Here is the default config :
 
 ```toml
 [prayer]
 method = "MuslimWorldLeague"
 madhab = "Shafi"
 fajr_mod = 0
-dohr_mod = 0
+dhuhr_mod = 0
 asr_mod = 0
 maghrib_mod = 0
 isha_mod = 0
@@ -84,7 +84,7 @@ urgency = "Critical"
 interval = 20
 ```
 
-If you specify cli arguments, it will always take precedence on what you have on your config. If you don't specify any latitude and longitude it will be infered from your IP address. Location from an IP address is not always totally accurate so I advise you greatly to specify your own latitude and longitude if you want to have the most accurate prayer time.
+If you specify cli arguments, it will always take precedence on what you have on your config. If you don't specify any latitude and longitude it will be infered from your IP address. Location from an IP address is not accurate so I advise you greatly to specify your own latitude and longitude if you want to have the most accurate prayer time.
 
 ## Examples
 
@@ -93,7 +93,7 @@ If you specify cli arguments, it will always take precedence on what you have on
 Adhan Dhuhr in 01:13
 ```
 
-`prayer-times list-prayers`
+`prayer-times prayers`
 ```sh
 Prayer times:
 Adhan Fajr at 07:32:32
@@ -103,7 +103,7 @@ Adhan Maghrib at 20:23:24
 Adhan Isha at 22:08:05
 ```
 
-`prayer-times list-methods`
+`prayer-times methods`
 ```sh
 MuslimWorldLeague : [ fajr angle: 18, isha angle: 17 ]
 NorthAmerica : [ fajr angle: 15, isha angle: 15 ]
@@ -116,7 +116,7 @@ FranceUOIF : [ fajr angle: 12, isha angle: 12 ]
 FranceGMP : [ fajr angle: 18, isha angle: 18 ]
 ```
 
-`prayer-times list-madhab`
+`prayer-times madhab`
 ```sh
 Madhab:
 Shafi

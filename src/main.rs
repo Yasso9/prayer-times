@@ -13,12 +13,13 @@ mod prayers;
 
 use self::{
     arguments::generation::generate, arguments::Arguments, arguments::Commands, config::Config,
-    madhab::Madhab, method::Method, notification::notify_prayer,
+    madhab::Madhab,
 };
 
 // TODO Use argument::parse() inside the argument module so we don't include this
 use clap::Parser;
 use daemon::run_daemon;
+use method::MethodVariant;
 
 fn main() {
     let args = Arguments::parse();
@@ -26,7 +27,7 @@ fn main() {
     let default = Commands::default();
     let command = args.command.as_ref().unwrap_or(&default);
     match command {
-        Commands::Deamon(_deamon) => {
+        Commands::Daemon(_daemon) => {
             let config = Config::new(&args);
             run_daemon(&config);
         }
@@ -45,26 +46,36 @@ fn main() {
             let prayer = prayers::next(&config);
             println!("{}", prayer.text_duration());
         }
-        Commands::ListPrayers => {
+        Commands::Prayers(list_prayers_args) => {
             let config = Config::new(&args);
-            println!("Prayer times:");
-            for prayer in prayers::list_prayers(&config) {
+
+            let prayer_list = if let Some(date_str) = &list_prayers_args.date {
+                match chrono::NaiveDate::parse_from_str(date_str, "%Y-%m-%d") {
+                    Ok(date) => prayers::list_prayers_for_date(&config, date),
+                    Err(_) => {
+                        eprintln!("Error: Invalid date format. Please use YYYY-MM-DD format.");
+                        std::process::exit(1);
+                    }
+                }
+            } else {
+                prayers::list_prayers(&config)
+            };
+
+            for prayer in prayer_list {
                 println!("{}", prayer.text_time());
             }
         }
-        Commands::ListMethods => {
-            println!("Methods:");
-            Method::list_all();
+        Commands::Methods => {
+            MethodVariant::list();
         }
-        Commands::ListMadhab => {
-            println!("Madhab:");
+        Commands::Madhab => {
             Madhab::list_all();
         }
-        Commands::DryRun => {
-            let config = Config::new(&args);
-            let next_prayer = prayers::next(&config);
-            notify_prayer(&next_prayer, &config);
-        }
+        // Commands::DryRun => {
+        //     let config = Config::new(&args);
+        //     let next_prayer = prayers::next(&config);
+        //     notify_prayer(&next_prayer, &config);
+        // }
         Commands::Config => {
             let (program, config) = config::config_options();
             let result = confy::get_configuration_file_path(program, config);
