@@ -5,7 +5,7 @@ use crate::event::Event;
 use crate::location::current_location;
 use crate::location::Location;
 use crate::madhab::Madhab;
-use crate::method::Method;
+use crate::method::{MethodVariant, ParamValue};
 use crate::notification_urgency::NotifUrgency;
 use crate::Arguments;
 use chrono::Local;
@@ -18,7 +18,7 @@ use std::error::Error;
 
 #[derive(Serialize, Deserialize, Clone)]
 struct PrayerConfig {
-    method: Method,
+    method: MethodVariant,
     madhab: Madhab,
     fajr_mod: i8,
     dhuhr_mod: i8,
@@ -47,7 +47,7 @@ impl Default for Config {
             location: None,
             timezone: None,
             prayer: PrayerConfig {
-                method: Method::default(),
+                method: MethodVariant::default(),
                 madhab: Madhab::default(),
                 fajr_mod: 0,
                 dhuhr_mod: 0,
@@ -152,11 +152,11 @@ impl Config {
         }
     }
 
-    pub fn fajr_angle(&self) -> f64 {
-        self.prayer.method.fajr_angle()
+    pub fn fajr_param(&self) -> ParamValue {
+        self.prayer.method.get().params.fajr
     }
-    pub fn isha_angle(&self) -> f64 {
-        self.prayer.method.isha_angle()
+    pub fn isha_param(&self) -> ParamValue {
+        self.prayer.method.get().params.isha
     }
     pub fn shadow_multiplier(&self) -> u8 {
         self.prayer.madhab.shadow_multiplier()
@@ -193,7 +193,6 @@ impl Config {
 
 fn parse_timezone_string(tz_str: &str) -> i64 {
     if let Ok(tz) = tz_str.parse::<chrono_tz::Tz>() {
-        println!("Using timezone: {}", timezone_to_offset(tz));
         return timezone_to_offset(tz);
     }
 

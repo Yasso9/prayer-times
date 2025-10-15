@@ -1,4 +1,4 @@
-use crate::{config::Config, event::Event};
+use crate::{config::Config, event::Event, method::ParamValue};
 use chrono::{Datelike, Days, NaiveDate, NaiveDateTime, NaiveTime};
 
 mod math;
@@ -103,15 +103,30 @@ impl AstronomicalMeasures {
         };
         let diff_night = full_sunrise - sunset;
 
+        let fajr = {
+            let fajr_param = config.fajr_param();
+            match fajr_param {
+                ParamValue::Angle(angle) => dhuhr - solar_hour_angle(angle),
+                ParamValue::Minutes(minutes) => dhuhr - minutes as f64 / 60.,
+            }
+        };
+        let isha = {
+            let isha_param = config.isha_param();
+            match isha_param {
+                ParamValue::Angle(angle) => dhuhr + solar_hour_angle(angle),
+                ParamValue::Minutes(minutes) => sunset + minutes as f64 / 60.,
+            }
+        };
+
         Self {
             date,
-            fajr: dhuhr - solar_hour_angle(config.fajr_angle()) + config.offset(Event::Fajr),
             sunrise,
+            fajr: fajr + config.offset(Event::Fajr),
             dhuhr: dhuhr + config.offset(Event::Dhuhr),
             asr: dhuhr + asr + config.offset(Event::Asr),
-            sunset: sunset,
+            sunset,
             maghrib: sunset + config.offset(Event::Maghrib),
-            isha: dhuhr + solar_hour_angle(config.isha_angle()) + config.offset(Event::Isha),
+            isha: isha + config.offset(Event::Isha),
             midnight: sunset + 0.5 * diff_night,
             // third_of_night: sunset + 0.75 * diff_night,
         }

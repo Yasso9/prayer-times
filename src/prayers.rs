@@ -45,7 +45,7 @@ mod tests {
     use super::*;
     use crate::config::Config;
     use crate::madhab::Madhab;
-    use crate::method::Method;
+    use crate::method::MethodVariant;
 
     fn paris_config() -> Config {
         use crate::arguments::Arguments;
@@ -55,7 +55,7 @@ mod tests {
             latitude: Some(48.8566),
             longitude: Some(2.3522),
             timezone: Some("Europe/Paris".to_string()),
-            method: Some(Method::FranceUOIF),
+            method: Some(MethodVariant::FRANCE),
             madhab: Some(Madhab::Shafi),
             fajr_mod: None,
             dhuhr_mod: None,
@@ -78,13 +78,105 @@ mod tests {
             latitude: Some(21.42664),
             longitude: Some(39.82563),
             timezone: Some("Asia/Riyadh".to_string()),
-            method: Some(Method::UmmAlQura),
+            method: Some(MethodVariant::MAKKAH),
             madhab: Some(Madhab::Shafi),
             fajr_mod: None,
             dhuhr_mod: None,
             asr_mod: None,
             maghrib_mod: None,
             isha_mod: None,
+            notify_before: None,
+            icon: None,
+            urgency: None,
+        };
+
+        Config::new(&args)
+    }
+
+    fn cairo_config() -> Config {
+        use crate::arguments::Arguments;
+
+        let args = Arguments {
+            command: None,
+            latitude: Some(30.0444),
+            longitude: Some(31.2357),
+            timezone: Some("Africa/Cairo".to_string()),
+            method: Some(MethodVariant::EGYPT),
+            madhab: Some(Madhab::Hanafi),
+            fajr_mod: None,
+            dhuhr_mod: None,
+            asr_mod: None,
+            maghrib_mod: None,
+            isha_mod: None,
+            notify_before: None,
+            icon: None,
+            urgency: None,
+        };
+
+        Config::new(&args)
+    }
+
+    fn istanbul_config() -> Config {
+        use crate::arguments::Arguments;
+
+        let args = Arguments {
+            command: None,
+            latitude: Some(41.0082),
+            longitude: Some(28.9784),
+            timezone: Some("Europe/Istanbul".to_string()),
+            method: Some(MethodVariant::TURKEY),
+            madhab: Some(Madhab::Hanafi),
+            fajr_mod: None,
+            dhuhr_mod: None,
+            asr_mod: None,
+            maghrib_mod: None,
+            isha_mod: None,
+            notify_before: None,
+            icon: None,
+            urgency: None,
+        };
+
+        Config::new(&args)
+    }
+
+    fn medina_config() -> Config {
+        use crate::arguments::Arguments;
+
+        let args = Arguments {
+            command: None,
+            latitude: Some(24.5247),
+            longitude: Some(39.5692),
+            timezone: Some("Asia/Riyadh".to_string()),
+            method: Some(MethodVariant::MAKKAH),
+            madhab: Some(Madhab::Hanafi),
+            fajr_mod: None,
+            dhuhr_mod: None,
+            asr_mod: None,
+            maghrib_mod: None,
+            isha_mod: None,
+            notify_before: None,
+            icon: None,
+            urgency: None,
+        };
+
+        Config::new(&args)
+    }
+
+    fn paris_config_with_modifications() -> Config {
+        use crate::arguments::Arguments;
+
+        let args = Arguments {
+            command: None,
+            latitude: Some(48.8566),
+            longitude: Some(2.3522),
+            timezone: Some("Europe/Paris".to_string()),
+            method: Some(MethodVariant::FRANCE),
+            madhab: Some(Madhab::Shafi),
+            fajr_mod: Some(5),
+            dhuhr_mod: Some(-2),
+            asr_mod: Some(3),
+            maghrib_mod: Some(-1),
+            isha_mod: Some(4),
             notify_before: None,
             icon: None,
             urgency: None,
@@ -120,12 +212,88 @@ mod tests {
 
         // curl -X GET "https://api.aladhan.com/v1/timings/01-01-2022?latitude=21.42664&longitude=39.82563&method=4&timezonestring=Asia%2FRiyadh" -H 'accept: application/json' | jq
         assert_eq!(prayers[0].time().format("%H:%M").to_string(), "05:37");
-        assert_eq!(prayers[1].time().format("%H:%M").to_string(), "06:59");
+        assert_eq!(prayers[1].time().format("%H:%M").to_string(), "06:58");
         assert_eq!(prayers[2].time().format("%H:%M").to_string(), "12:24");
-        assert_eq!(prayers[3].time().format("%H:%M").to_string(), "15:29");
-        assert_eq!(prayers[4].time().format("%H:%M").to_string(), "17:50");
-        assert_eq!(prayers[5].time().format("%H:%M").to_string(), "17:50");
+        assert_eq!(prayers[3].time().format("%H:%M").to_string(), "15:28");
+        assert_eq!(prayers[4].time().format("%H:%M").to_string(), "17:49");
+        assert_eq!(prayers[5].time().format("%H:%M").to_string(), "17:49");
         assert_eq!(prayers[6].time().format("%H:%M").to_string(), "19:20");
         assert_eq!(prayers[7].time().format("%H:%M").to_string(), "00:24");
+    }
+
+    #[test]
+    fn test_cairo_prayer_times_march_15_2024() {
+        let config = cairo_config();
+        let date = NaiveDate::from_ymd_opt(2024, 3, 15).unwrap();
+
+        let prayers = list_prayers_for_date(&config, date);
+
+        // curl -X GET "https://api.aladhan.com/v1/timings/15-03-2024?latitude=30.0444&longitude=31.2357&method=5&timezonestring=Africa/Cairo&school=1" -H 'accept: application/json' | jq
+        assert_eq!(prayers[0].time().format("%H:%M").to_string(), "04:38");
+        assert_eq!(prayers[1].time().format("%H:%M").to_string(), "06:05");
+        assert_eq!(prayers[2].time().format("%H:%M").to_string(), "12:04");
+        assert_eq!(prayers[3].time().format("%H:%M").to_string(), "16:22");
+        assert_eq!(prayers[4].time().format("%H:%M").to_string(), "18:04");
+        assert_eq!(prayers[5].time().format("%H:%M").to_string(), "18:04");
+        assert_eq!(prayers[6].time().format("%H:%M").to_string(), "19:21");
+        assert_eq!(prayers[7].time().format("%H:%M").to_string(), "00:04");
+    }
+
+    #[test]
+    fn test_istanbul_prayer_times_june_20_2024() {
+        let config = istanbul_config();
+        let date = NaiveDate::from_ymd_opt(2024, 6, 20).unwrap();
+
+        let prayers = list_prayers_for_date(&config, date);
+
+        // curl -X GET "https://api.aladhan.com/v1/timings/20-06-2024?latitude=41.0082&longitude=28.9784&method=9&timezonestring=Europe/Istanbul&school=1" -H 'accept: application/json' | jq
+        assert_eq!(prayers[0].time().format("%H:%M").to_string(), "03:24");
+        assert_eq!(prayers[1].time().format("%H:%M").to_string(), "05:32");
+        assert_eq!(prayers[2].time().format("%H:%M").to_string(), "13:06");
+        assert_eq!(prayers[3].time().format("%H:%M").to_string(), "18:21");
+        assert_eq!(prayers[4].time().format("%H:%M").to_string(), "20:40");
+        assert_eq!(prayers[5].time().format("%H:%M").to_string(), "20:40");
+        assert_eq!(prayers[6].time().format("%H:%M").to_string(), "22:43");
+        assert_eq!(prayers[7].time().format("%H:%M").to_string(), "01:06");
+    }
+
+    #[test]
+    fn test_medina_prayer_times_september_10_2023() {
+        let config = medina_config();
+        let date = NaiveDate::from_ymd_opt(2023, 9, 10).unwrap();
+
+        let prayers = list_prayers_for_date(&config, date);
+
+        // curl -X GET "https://api.aladhan.com/v1/timings/10-09-2023?latitude=24.5247&longitude=39.5692&method=4&timezonestring=Asia/Riyadh&school=1" -H 'accept: application/json' | jq
+        assert_eq!(prayers[0].time().format("%H:%M").to_string(), "04:47");
+        assert_eq!(prayers[1].time().format("%H:%M").to_string(), "06:06");
+        assert_eq!(prayers[2].time().format("%H:%M").to_string(), "12:19");
+        assert_eq!(prayers[3].time().format("%H:%M").to_string(), "16:47");
+        assert_eq!(prayers[4].time().format("%H:%M").to_string(), "18:31");
+        assert_eq!(prayers[5].time().format("%H:%M").to_string(), "18:31");
+        assert_eq!(prayers[6].time().format("%H:%M").to_string(), "20:01");
+        assert_eq!(prayers[7].time().format("%H:%M").to_string(), "00:19");
+    }
+
+    #[test]
+    fn test_paris_prayer_times_with_modifications_august_10_2024() {
+        let config = paris_config_with_modifications();
+        let date = NaiveDate::from_ymd_opt(2024, 8, 10).unwrap();
+
+        let prayers = list_prayers_for_date(&config, date);
+
+        // Base times from API (without modifications):
+        // curl -X GET "https://api.aladhan.com/v1/timings/10-08-2024?latitude=48.8566&longitude=2.3522&method=12&timezonestring=Europe/Paris" -H 'accept: application/json' | jq
+        // Fajr: 05:16, Sunrise: 06:37, Dhuhr: 13:56, Asr: 17:57, Sunset: 21:14, Maghrib: 21:14, Isha: 22:35, Midnight: 01:56
+        //
+        // With modifications (fajr_mod: +5, dhuhr_mod: -2, asr_mod: +3, maghrib_mod: -1, isha_mod: +4):
+        assert_eq!(prayers[0].time().format("%H:%M").to_string(), "05:21"); // Fajr: 05:16 + 5 min
+        assert_eq!(prayers[1].time().format("%H:%M").to_string(), "06:37"); // Sunrise: no modification
+        assert_eq!(prayers[2].time().format("%H:%M").to_string(), "13:54"); // Dhuhr: 13:56 - 2 min
+        assert_eq!(prayers[3].time().format("%H:%M").to_string(), "18:00"); // Asr: 17:57 + 3 min
+        assert_eq!(prayers[4].time().format("%H:%M").to_string(), "21:14"); // Sunset: no modification
+        assert_eq!(prayers[5].time().format("%H:%M").to_string(), "21:13"); // Maghrib: 21:14 - 1 min
+        assert_eq!(prayers[6].time().format("%H:%M").to_string(), "22:39"); // Isha: 22:35 + 4 min
+        assert_eq!(prayers[7].time().format("%H:%M").to_string(), "01:56"); // Midnight: no modification
     }
 }

@@ -13,12 +13,13 @@ mod prayers;
 
 use self::{
     arguments::generation::generate, arguments::Arguments, arguments::Commands, config::Config,
-    madhab::Madhab, method::Method,
+    madhab::Madhab,
 };
 
 // TODO Use argument::parse() inside the argument module so we don't include this
 use clap::Parser;
 use daemon::run_daemon;
+use method::MethodVariant;
 
 fn main() {
     let args = Arguments::parse();
@@ -65,7 +66,7 @@ fn main() {
             }
         }
         Commands::Methods => {
-            Method::list_all();
+            MethodVariant::list();
         }
         Commands::Madhab => {
             Madhab::list_all();

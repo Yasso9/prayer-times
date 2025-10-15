@@ -3,7 +3,7 @@ pub mod generation;
 use std::path::PathBuf;
 
 use crate::madhab::Madhab;
-use crate::method::Method;
+use crate::method::MethodVariant;
 use crate::notification_urgency::NotifUrgency;
 use clap::Args;
 use clap::Parser;
@@ -31,7 +31,7 @@ pub struct Arguments {
 
     /// Calculation Method to use
     #[arg(short = 'm', long)]
-    pub method: Option<Method>,
+    pub method: Option<MethodVariant>,
     /// Madhab to use
     #[arg(short = 'M', long)]
     pub madhab: Option<Madhab>,
