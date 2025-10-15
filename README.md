@@ -35,23 +35,26 @@ cargo build --release
 ## Usage
 
 ```man
+Islamic Prayer Times Information and Notifications
+
 Usage: prayer-times [OPTIONS] [COMMAND]
 
 Commands:
   daemon          Start the process that will send notifications on prayers time [default]
+  previous        Get the previous prayer
   current         Get the current prayer
   next            Get the next prayer
-  prayers    List all the prayers of the current day
-  methods    List all methods available for the calculation of the prayer times
-  madhab     List all madhab available for the calculation of the prayer times
-  dry-run         Show the next prayer in a notification to test if everything works
-  config          Get the path of the toml config file
+  prayers         List all the prayers of a specific date (defaults to current day)
+  methods         List all methods available for the calculation of the prayer times
+  madhab          List all madhab available for the calculation of the prayer times
+  config          Show the next prayer in a notification to test if everything works Get the path of the toml config file
   generate-shell  Generate shell completions and man pages
   help            Print this message or the help of the given subcommand(s)
 
 Options:
   -l, --latitude <LATITUDE>            Latitude. Defaults to the current location
   -L, --longitude <LONGITUDE>          Longitude. Defaults to the current location
+  -t, --timezone <TIMEZONE>            Timezone for prayer times (e.g., "America/New_York", "Etc/GMT", "UTC") [default: system timezone]
   -m, --method <METHOD>                Calculation Method to use
   -M, --madhab <MADHAB>                Madhab to use
       --fajr-mod <FAJR_MOD>            Minutes to add or remove to the Fajr time
@@ -70,7 +73,7 @@ You can also configure the program from a config file located in `$XDG_CONFIG_HO
 
 ```toml
 [prayer]
-method = "MuslimWorldLeague"
+method = "MWL"
 madhab = "Shafi"
 fajr_mod = 0
 dhuhr_mod = 0
@@ -89,36 +92,50 @@ If you specify cli arguments, it will always take precedence on what you have on
 ## Examples
 
 `prayer-times next`
-```sh
+```
 Adhan Dhuhr in 01:13
 ```
 
 `prayer-times prayers`
-```sh
-Prayer times:
-Adhan Fajr at 07:32:32
-Adhan Dhuhr at 13:55:24
-Adhan Asr at 17:29:43
-Adhan Maghrib at 20:23:24
-Adhan Isha at 22:08:05
+```
+Fajr at 07:03:06
+Sunrise at 08:11:30
+Dhuhr at 13:36:18
+Asr at 16:28:00
+Sunset at 19:01:05
+Maghrib at 19:01:05
+Isha at 20:09:29
+Midnight at 01:36:18
 ```
 
 `prayer-times methods`
-```sh
-MuslimWorldLeague : [ fajr angle: 18, isha angle: 17 ]
-NorthAmerica : [ fajr angle: 15, isha angle: 15 ]
-Egyptian : [ fajr angle: 19.5, isha angle: 17.5 ]
-UmmAlQura : [ fajr angle: 18.5, isha angle: 18.5 ]
-Karachi : [ fajr angle: 18, isha angle: 18 ]
-Tehran : [ fajr angle: 17.7, isha angle: 14 ]
-Jafari : [ fajr angle: 16, isha angle: 14 ]
-FranceUOIF : [ fajr angle: 12, isha angle: 12 ]
-FranceGMP : [ fajr angle: 18, isha angle: 18 ]
+```
+Muslim World League : [ fajr: 18°, isha: 17° ]
+Islamic Society of North America (ISNA) : [ fajr: 15°, isha: 15° ]
+Egyptian General Authority of Survey : [ fajr: 19.5°, isha: 17.5° ]
+Umm Al-Qura University, Makkah : [ fajr: 18.5°, isha: 90 min ]
+University of Islamic Sciences, Karachi : [ fajr: 18°, isha: 18° ]
+Institute of Geophysics, University of Tehran : [ fajr: 17.7°, isha: 14° ]
+Shia Ithna-Ashari, Leva Institute, Qum : [ fajr: 16°, isha: 14° ]
+Gulf Region : [ fajr: 19.5°, isha: 90 min ]
+Kuwait : [ fajr: 18°, isha: 17.5° ]
+Qatar : [ fajr: 18°, isha: 90 min ]
+Majlis Ugama Islam Singapura, Singapore : [ fajr: 20°, isha: 18° ]
+Union Organization Islamic de France : [ fajr: 12°, isha: 12° ]
+Diyanet İşleri Başkanlığı, Turkey : [ fajr: 18°, isha: 17° ]
+Spiritual Administration of Muslims of Russia : [ fajr: 16°, isha: 15° ]
+Dubai : [ fajr: 18.2°, isha: 18.2° ]
+Jabatan Kemajuan Islam Malaysia (JAKIM) : [ fajr: 20°, isha: 18° ]
+Tunisia : [ fajr: 18°, isha: 18° ]
+Algeria : [ fajr: 18°, isha: 17° ]
+Kementerian Agama Republik Indonesia : [ fajr: 20°, isha: 18° ]
+Morocco : [ fajr: 19°, isha: 17° ]
+Comunidade Islamica de Lisboa : [ fajr: 18°, isha: 77 min ]
+Ministry of Awqaf, Islamic Affairs and Holy Places, Jordan : [ fajr: 18°, isha: 18° ]
 ```
 
 `prayer-times madhab`
-```sh
-Madhab:
+```
 Shafi
 Hanafi
 ```
